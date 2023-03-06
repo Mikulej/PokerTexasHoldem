@@ -366,7 +366,7 @@ inline void options_handler() {
             options_init(); return;
         }
     }
-    //SELECT STARTING CREDITS
+    //SELECT SMALL BIND?
     if (StaticObject::collisionList.at(10).pointed_by_mouse()) {
         if (mouse_click()) { //options_init() placeholder
          
@@ -407,7 +407,8 @@ inline void play_handler() {
         if (StaticObject::collisionList.at(1).pointed_by_mouse()) {
             if (mouse_click()) { //bigger raise 
                 Game::raise += 100;
-                if (Game::raise > Gracz::graczList[0].get_credits()) {}
+				if (Game::raise > Gracz::graczList[0].get_credits()) { Game::button1_desc = "All in"; }
+				else{ Game::button1_desc = "Raise"; }
                 play_init(); return;
             }
         }
@@ -419,6 +420,7 @@ inline void play_handler() {
         }
         if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
             if (mouse_click()) { //call (give minimum and instantly check)
+
             }
         }
         if (StaticObject::collisionList.at(4).pointed_by_mouse()) {
@@ -432,11 +434,6 @@ inline void play_handler() {
 }
 inline void play_init() {
     StaticObject::DelAll(); Text::DelAll();
-    StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
-    StaticObject::AddItem(1, 0.2f, -0.9f);  Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
-    StaticObject::AddItem(1, -0.2f, -0.9f);  Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
-    StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Call", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true);
-    StaticObject::AddItem(2, 0.8f, -0.7f);  Text::Add("Fold", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
     game_state = play_state;
     if (!Game::game_started) {
         Game::stworz_talie(Game::talia);
@@ -444,8 +441,19 @@ inline void play_init() {
         Gracz::graczList.push_back(Gracz()); Gracz::graczList[1].wez_karty_z_talii(); Gracz::graczList[1].add_credits(Game::starting_credits);
         if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
         else { Game::whos_dealer = Game::dealer_option; Game::enemy_turn = Game::whos_dealer; }
+		Game::blinds(Game::whos_dealer);
+		Game::raise = Game::minimal_raise;
         Game::game_started = true;
     }
+	//
+	StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add(Game::button1_desc, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
+	StaticObject::AddItem(1, 0.2f, -0.9f);  Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
+	StaticObject::AddItem(1, -0.2f, -0.9f);  Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
+	if (Gracz::graczList[0].gave_to_pool == Gracz::graczList[1].gave_to_pool) { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Check", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
+	else { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Call", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
+	//StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add(Game::button2_desc, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true);???
+	StaticObject::AddItem(2, 0.8f, -0.7f);  Text::Add("Fold", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
+	//
     StaticObject::AddItem(11, -0.5f, -0.7f,Gracz::graczList[0].reka[0].get_numer(), Gracz::graczList[0].reka[0].get_kolor());//5
     StaticObject::AddItem(11, -0.8f, -0.7f, Gracz::graczList[0].reka[1].get_numer(), Gracz::graczList[0].reka[1].get_kolor());//6
     StaticObject::AddItem(10, -0.5f, 0.7f); 

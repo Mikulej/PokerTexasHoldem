@@ -76,11 +76,10 @@ void Gracz::wez_karty_z_talii() {
 	reka.push_back(Game::talia.back()); Game::talia.pop_back();
 }
 void Gracz::raise(int _v) {
-	Game::add_pool(_v);
-	add_credits(-_v);
+	give_to_pool(_v);
 }
 void Gracz::random_action() {
-	int r = rand() % 10;
+	int r = (rand() % 9) + 1;
 	raise((r / 2) * 100);
 	Game::enemy_desc = "Enemy raised by " + std::to_string((r / 2) * 100) + ".";
 	//if (r < 3) {//raise
@@ -92,6 +91,11 @@ void Gracz::random_action() {
 	//else {//fold
 
 	//}
+}
+void Gracz::give_to_pool(int _v) {
+	Game::pool += _v;
+	gave_to_pool += _v;
+	add_credits(-_v);
 }
 //BOT
 
@@ -105,6 +109,8 @@ int Game::raise = 100;
 bool Game::game_started = false;
 bool Game::enemy_turn = false;
 std::string Game::enemy_desc = "Cards dealt.";
+std::string Game::button1_desc = "Raise";
+std::string Game::button2_desc = "Call";
 std::vector<Karta> Game::talia;
 std::vector<Karta> Game::stol;
 int rng(int i) { return std::rand() % i; }
@@ -115,9 +121,21 @@ void Game::stworz_talie(std::vector<Karta>& _talia) {
 void Game::clear_pool() {
 	pool = 0;
 }
-void Game::add_pool(int _v) {
-	pool += _v;
-}
+//void Game::add_pool_from(int _v,Gracz& _g) {
+//	pool += _v;
+//	_g.gave_to_pool += _v;
+//}
 int Game::get_pool() {
 	return pool;
+}
+void Game::blinds(int _d) {//przydziel stawki startowe
+	if (_d == 0) {//dealer to gracz otrzymuje small blind
+		Gracz::graczList[0].give_to_pool(100);
+		Gracz::graczList[1].give_to_pool(100);
+	}
+	else {
+		Gracz::graczList[0].give_to_pool(100);
+		Gracz::graczList[1].give_to_pool(200);
+	}
+	
 }

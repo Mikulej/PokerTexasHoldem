@@ -31,6 +31,7 @@ class Gracz {
 	
 	int credits;
 public:
+	int gave_to_pool;
 	std::vector<Karta> reka;
 	static std::vector<Gracz> graczList;
 	void add_credits(int);
@@ -38,6 +39,7 @@ public:
 	void wez_karty_z_talii();
 	void raise(int);
 	void random_action();
+	void give_to_pool(int);
 
 };
 //BOT
@@ -46,9 +48,10 @@ class Bot : public Gracz {
 };
 //GAME czy ta klasa wgl jest potrzebna?
 class Game {
-	static int pool;
+	
 
 public:
+	static int pool;
 	static int dealer_option;//wybor
 	static int whos_dealer;//0=player 1=enemy
 	static int starting_credits;
@@ -57,10 +60,13 @@ public:
 	static bool game_started;
 	static bool enemy_turn;
 	static std::string enemy_desc;
+	static std::string button1_desc;
+	static std::string button2_desc;
 	static void clear_pool(void);
-	static void add_pool(int);
+	//static void add_pool_from(int,Gracz&);
 	static int get_pool(void);
 	static std::vector<Karta> talia;
 	static std::vector<Karta> stol;
 	static void stworz_talie(std::vector<Karta>&);
+	static void blinds(int);
 };
