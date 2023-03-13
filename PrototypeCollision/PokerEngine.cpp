@@ -115,16 +115,9 @@ void Gracz::random_action() {
 	//}
 	call(1);
 	//fold(1);
-	//if (r < 3) {//raise
 
-	//}
-	//else if (r >= 3 && r< 8) {//call
-
-	//}
-	//else {//fold
-
-	//}
 }
+
 void Gracz::give_to_pool(int _v) {
 	Game::pool += _v;
 	gave_to_pool += _v;
@@ -141,9 +134,14 @@ int Game::minimal_raise = 100;
 int Game::raise = 100;
 bool Game::game_started = false;
 bool Game::enemy_turn = false;
+
 int Game::checked_cards = 0;
 int Game::whowins = 2; //0=player 1=enemy 2=none
 std::string Game::enemy_desc = "New cards dealt.";
+
+//std::string Game::enemy_desc = "Cards dealt.";
+//std::string Game::button1_desc = "Raise";
+//std::string Game::button2_desc = "Call";
 std::vector<Karta> Game::talia;
 std::vector<Karta> Game::stol;
 int rng(int i) { return std::rand() % i; }
@@ -163,6 +161,7 @@ void Game::clear_pool() {
 	Gracz::graczList[1].gave_to_pool = 0;
 }
 
+
 int Game::get_pool() {
 	return pool;
 }
@@ -175,5 +174,10 @@ void Game::blinds(int _d) {//przydziel stawki startowe
 		Gracz::graczList[0].give_to_pool(100);
 		Gracz::graczList[1].give_to_pool(200);
 	}
-
 }
+
+//void Game::add_pool_from(int _v,Gracz& _g) {
+//	pool += _v;
+//	_g.gave_to_pool += _v;
+//}
+

@@ -62,6 +62,8 @@ public:
 	static int checked_cards;
 	static int whowins; //0=player 1=enemy 2=none
 	static std::string enemy_desc;
+	static std::string button1_desc;
+	static std::string button2_desc;
 	static void clear_pool(void);
 	static int get_pool(void);
 	static std::vector<Karta> talia;
