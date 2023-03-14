@@ -1,4 +1,5 @@
 #include "PokerEngine.h"
+extern int ending_game;
 std::string enemy_desc;
 //KARTA
 std::vector<Karta> Karta::komplet;
@@ -32,7 +33,6 @@ void Karta::set_rewers(int _r) {
 		rewers = 9;
 		break;
 	}
-
 }
 int Karta::get_rewers() {
 	return rewers;
@@ -91,14 +91,10 @@ void Gracz::call(int _caller) {
 }
 void Gracz::fold(int _folder) {
 	int enemy = 1 - _folder;
-	Gracz::graczList[enemy].add_credits(Game::get_pool());
-	Game::clear_pool();
 	if (_folder) { Game::enemy_desc = "Enemy folds."; }
-	Game::game_started = false;
-	Game::whowins = enemy;
-
+	Game::end_round(enemy);
 }
-void Gracz::random_action() {
+void Gracz::bot_action() {
 	//if (Gracz::graczList[0].allin) {//poszedl all-in nie podbijaj stawki
 	//	
 	//	if (gave_to_pool >= Gracz::graczList[0].gave_to_pool) {
@@ -123,7 +119,6 @@ void Gracz::give_to_pool(int _v) {
 	gave_to_pool += _v;
 	add_credits(-_v);
 }
-//BOT
 
 //GAME
 int Game::pool = 0;
@@ -137,11 +132,8 @@ bool Game::enemy_turn = false;
 
 int Game::checked_cards = 0;
 int Game::whowins = 2; //0=player 1=enemy 2=none
+int Game::won_prize = 0;
 std::string Game::enemy_desc = "New cards dealt.";
-
-//std::string Game::enemy_desc = "Cards dealt.";
-//std::string Game::button1_desc = "Raise";
-//std::string Game::button2_desc = "Call";
 std::vector<Karta> Game::talia;
 std::vector<Karta> Game::stol;
 int rng(int i) { return std::rand() % i; }
@@ -161,7 +153,6 @@ void Game::clear_pool() {
 	Gracz::graczList[1].gave_to_pool = 0;
 }
 
-
 int Game::get_pool() {
 	return pool;
 }
@@ -175,9 +166,22 @@ void Game::blinds(int _d) {//przydziel stawki startowe
 		Gracz::graczList[1].give_to_pool(200);
 	}
 }
-
-//void Game::add_pool_from(int _v,Gracz& _g) {
-//	pool += _v;
-//	_g.gave_to_pool += _v;
-//}
+void Game::end_round(int _winner) {
+	int enemy = 1 - _winner;
+	won_prize = pool;
+	Gracz::graczList[_winner].add_credits(Game::get_pool());
+	clear_pool();
+	game_started = false;
+	whowins = _winner;
+	Game::enemy_desc = "New cards dealt.";
+	if (Gracz::graczList[enemy].get_credits() == 0) {//bankrut - koniec gry
+		//end_game(_winner);
+		ending_game = _winner;
+	}
+}
+void Game::end_game(int _winner) {
+	if (_winner == 0) { std::cout << "Wygrales!" << std::endl; }
+	else { std::cout << "Przegrales!" << std::endl; }
+	//game_state = main_menu
+}
 

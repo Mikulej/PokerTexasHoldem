@@ -38,12 +38,9 @@ public:
 	void raise(int);
 	void call(int);
 	void fold(int);
-	void random_action();
+	void bot_action();
 	void give_to_pool(int);
-
-};
-//BOT
-class Bot : public Gracz {
+	
 
 };
 //GAME czy ta klasa wgl jest potrzebna?
@@ -61,9 +58,8 @@ public:
 	static bool enemy_turn;
 	static int checked_cards;
 	static int whowins; //0=player 1=enemy 2=none
+	static int won_prize; //wartosc pool na koncu poprzedniej rundy
 	static std::string enemy_desc;
-	static std::string button1_desc;
-	static std::string button2_desc;
 	static void clear_pool(void);
 	static int get_pool(void);
 	static std::vector<Karta> talia;
@@ -71,4 +67,6 @@ public:
 	static void stworz_talie(std::vector<Karta>&);
 	static void stworz_stol();
 	static void blinds(int);
+	static void end_round(int);
+	static void end_game(int);
 };

@@ -1,6 +1,5 @@
 #include "Source.h"
 
-
 extern unsigned int texture_box, texture_karty;
 extern double mx = 0, my = 0;//mouse x,y position
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -118,31 +117,6 @@ int main()
     }
     stbi_image_free(data);
 
-    //glGenTextures(1, &texture_karty);
-    //glBindTexture(GL_TEXTURE_2D, texture_karty);
-    ////std::cout << "tex id: " << texture << std::endl;
-    ////set the texture wrapping/filtering options (on currently bound texture)
-//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-//data = stbi_load("karty.png", &width, &height, &nrChannels, 0);
-//if (data)
-//{
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-//    glGenerateMipmap(GL_TEXTURE_2D);
-//}
-//else
-//{
-//    std::cout << "Failed to load texture" << std::endl;
-//}
-//stbi_image_free(data);
-
-// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
-// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-// glBindVertexArray(0);
-
 /////////////////////////TEKSTURA RGBA
     glGenTextures(1, &texture_karty);
     glBindTexture(GL_TEXTURE_2D, texture_karty);
@@ -225,6 +199,12 @@ bool waiting = false; bool waited = false;
 time_t start, now;
 inline bool mouse_click() {
     return mouse_state == GLFW_PRESS && mouse_old_state == GLFW_RELEASE;
+}
+int ending_game = 2; // 0 - gre wygral gracz 1 - gre wygral komputer 2 - gra sie toczy
+void end_game() {
+    //ending game = _winner;
+    if (ending_game == 0) { std::cout << "Wygrales!" << std::endl; }
+    else { std::cout << "Przegrales!" << std::endl; }
 }
 //INTERFACE HANDLERS
 inline void main_menu_handler() {
@@ -371,7 +351,7 @@ inline void options_handler() {
 }
 #define WAIT_TIME 2
 inline void play_handler() {
-    std::cout << "whowins=" << Game::whowins << std::endl;
+    //std::cout << "whowins=" << Game::whowins << std::endl;
     if (Game::whowins != 2) {//WINSCREEN
         if (mouse_click()) {
             Game::whowins = 2;
@@ -388,7 +368,7 @@ inline void play_handler() {
             }
             if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
             else {
-                Gracz::graczList[1].random_action();
+                Gracz::graczList[1].bot_action();
                 Game::enemy_turn = false;
                 waited = false;
                 play_init(); return;
@@ -424,6 +404,7 @@ inline void play_handler() {
             if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
                 if (mouse_click()) { //call 
                     Gracz::graczList[0].call(0);
+                    Game::enemy_turn = true;
                     play_init(); return;
                 }
             }
@@ -444,7 +425,7 @@ inline void play_init() {
     if (!Game::game_started) {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (first_round) {
-             Gracz::graczList[0].add_credits(Game::starting_credits);
+             Gracz::graczList[0].add_credits(Game::starting_credits - 3800);//testowo te -3800
              Gracz::graczList[1].add_credits(Game::starting_credits);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
@@ -453,6 +434,8 @@ inline void play_init() {
         else{
             Game::enemy_turn = Game::whos_dealer = 1 - Game::whos_dealer;
         }
+        Gracz::graczList[0].checks = false;
+        Gracz::graczList[1].checks = false;
         Game::stworz_talie(Game::talia);
         Gracz::graczList[0].wez_karty_z_talii(); 
         Gracz::graczList[1].wez_karty_z_talii(); 
@@ -460,8 +443,33 @@ inline void play_init() {
         Game::blinds(Game::whos_dealer);
         Game::raise = Game::minimal_raise;
         Game::checked_cards = 0;
+       
         Game::game_started = true;
     }
+    else {
+        Game::won_prize = 0;
+    }
+    //NO CREDITS CONDITION
+    if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
+        std::cout << "Wszystkie karty!" << std::endl;
+        Game::checked_cards = 4;
+        Gracz::graczList[0].checks = false;
+        Gracz::graczList[1].checks = false;
+        //Game::end_round(1);
+    }
+    else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
+            std::cout << "Wiecej kart!" << std::endl;
+            Game::checked_cards++;
+            Gracz::graczList[0].checks = false;
+            Gracz::graczList[1].checks = false;
+    }
+
+    if (Game::checked_cards == 4) {
+        Game::end_round(1);//ustal sposob wyboru wygrywajacego
+    }
+    
+   
+
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
     else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -476,17 +484,22 @@ inline void play_init() {
     //TEXT & UI
     switch (Game::whowins) {
     case 0:
-        Text::AddRaw("You Win!", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f));
+        Text::AddRaw("You Win!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.56f, 0.93f, 0.56f));
+        Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f), true);
+        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         break;
     case 1:      
-        Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f));
+        Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.447f, 0.463f));
+        Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f), true);
+        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         break;
     case 2:
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+        Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
         break;
     }
 
-    Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    
     Text::AddRaw("Your credits:", 0.2f, -0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
     Text::AddRaw(std::to_string(Gracz::graczList[0].get_credits()) + "(" + std::to_string(Gracz::graczList[0].gave_to_pool) + ")", 0.5f, -0.53f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     Text::AddRaw("Enemy credits:", 0.2f, 0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
@@ -497,12 +510,7 @@ inline void play_init() {
     if (Game::whos_dealer == 0) Text::AddRaw("You", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     else if (Game::whos_dealer == 1)  Text::AddRaw("Enemy", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     //std::cout << StaticObject::collisionList.size() << std::endl;
-    //CARDS
-    bool reveal_card = true;
-    for (auto g : Gracz::graczList) {
-        if (!g.checks) { reveal_card = false; }
-    }
-    if (reveal_card) { Game::checked_cards++; }
+
     //KARTA NR1
     if (Game::checked_cards == 0) { StaticObject::AddItem(10, -0.8f, 0.0f); }
     else{ StaticObject::AddItem(11, -0.8f, 0.0f,Game::stol[0].get_numer(), Game::stol[0].get_kolor()); }
@@ -519,16 +527,18 @@ inline void play_init() {
     if (Game::checked_cards <= 2) { StaticObject::AddItem(10, 0.4f, 0.0f); }
     else { StaticObject::AddItem(11, 0.4f, 0.0f, Game::stol[4].get_numer(), Game::stol[4].get_kolor()); }
     //ENDGAME & ENEMY HAND
-    if (reveal_card && Game::checked_cards == 4) {
+    if (Game::checked_cards == 4) {
         StaticObject::AddItem(11, -0.5f, 0.7f, Gracz::graczList[1].reka[0].get_numer(), Gracz::graczList[1].reka[0].get_kolor());
         StaticObject::AddItem(11, -0.8f, 0.7f, Gracz::graczList[1].reka[1].get_numer(), Gracz::graczList[1].reka[1].get_kolor());
-        Game::game_started = false;
-        Game::whowins = 1;//TESTOWO
-        //CHOOSE WINNER HERE napewno? moze powinno to byc gdzies w play_handler, odsloniecie kart moze zostac
     }
     else {
         StaticObject::AddItem(10, -0.5f, 0.7f);
         StaticObject::AddItem(10, -0.8f, 0.7f);
+    }
+    if (ending_game != 2) {
+        //dowal dodatkowe obiekty informujace od wygranej przegranej na srodku ekranu
+        //game_state = main_menu;
+        main_menu_init();
     }
 }
 inline void exit_program_init() {
