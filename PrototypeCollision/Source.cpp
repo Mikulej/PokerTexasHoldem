@@ -193,7 +193,6 @@ int main()
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 
-bool first_round = true;
 int mouse_state = 0, mouse_old_state = 0;
 bool waiting = false; bool waited = false;
 time_t start, now;
@@ -201,11 +200,6 @@ inline bool mouse_click() {
     return mouse_state == GLFW_PRESS && mouse_old_state == GLFW_RELEASE;
 }
 int ending_game = 2; // 0 - gre wygral gracz 1 - gre wygral komputer 2 - gra sie toczy
-void end_game() {
-    //ending game = _winner;
-    if (ending_game == 0) { std::cout << "Wygrales!" << std::endl; }
-    else { std::cout << "Przegrales!" << std::endl; }
-}
 //INTERFACE HANDLERS
 inline void main_menu_handler() {
     if (!StaticObject::collisionList.empty()) {
@@ -349,17 +343,28 @@ inline void options_handler() {
         }
     }
 }
-#define WAIT_TIME 2
+#define WAIT_TIME 3 //czas myslenia przeciwnika
 inline void play_handler() {
     //std::cout << "whowins=" << Game::whowins << std::endl;
-    if (Game::whowins != 2) {//WINSCREEN
-        if (mouse_click()) {
+    if (Game::whowins != 2) {//KONIEC RUNDY
+        if (mouse_click()) {            
+            if (ending_game != 2) { //KONIEC GRY
+                Game::end_game(ending_game);
+                main_menu_init();
+                return;
+            }
+            
+            //Game::enemy_desc = "New cards dealt.";
+          /*  Game::end_round(Game::whowins);
+            play_init();   
+            Game::whowins = 2;*/
             Game::whowins = 2;
-            play_init(); return;
+            play_init();
+            return;
         }
     }
-    else {
-        if (Game::enemy_turn) {
+    else { //GRA
+        if (Game::enemy_turn) {//RUCH KOMPUTERA
             if (waiting) {
                 time(&now);
                 //std::cout << difftime(now, start) << std::endl;
@@ -374,7 +379,7 @@ inline void play_handler() {
                 play_init(); return;
             }
         }
-        else {
+        else {//RUCHA GRACZA
             if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
                 if (mouse_click()) { //raise confirm
                     Gracz::graczList[0].raise(Game::raise);
@@ -424,12 +429,12 @@ inline void play_init() {
     //Game::Initialize()?
     if (!Game::game_started) {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
-        if (first_round) {
+        if (Game::first_round) {
              Gracz::graczList[0].add_credits(Game::starting_credits - 3800);//testowo te -3800
              Gracz::graczList[1].add_credits(Game::starting_credits);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
-            first_round = false;
+            Game::first_round = false;
         }
         else{
             Game::enemy_turn = Game::whos_dealer = 1 - Game::whos_dealer;
@@ -443,7 +448,6 @@ inline void play_init() {
         Game::blinds(Game::whos_dealer);
         Game::raise = Game::minimal_raise;
         Game::checked_cards = 0;
-       
         Game::game_started = true;
     }
     else {
@@ -458,6 +462,7 @@ inline void play_init() {
         //Game::end_round(1);
     }
     else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
+        //UWAGA uwzglednij sytuacje gdy robimy all in!
             std::cout << "Wiecej kart!" << std::endl;
             Game::checked_cards++;
             Gracz::graczList[0].checks = false;
@@ -467,8 +472,6 @@ inline void play_init() {
     if (Game::checked_cards == 4) {
         Game::end_round(1);//ustal sposob wyboru wygrywajacego
     }
-    
-   
 
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -484,14 +487,26 @@ inline void play_init() {
     //TEXT & UI
     switch (Game::whowins) {
     case 0:
-        Text::AddRaw("You Win!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.56f, 0.93f, 0.56f));
-        Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f), true);
-        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+        if (ending_game == 1) {
+            Text::AddRaw("Victory", 0.75f, 0.1f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f));
+            Text::AddRaw("(Click to return to menu)", 0.775f, 0.0f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+        else if (ending_game == 2) {
+            Text::AddRaw("You Win!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.56f, 0.93f, 0.56f));
+            Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f), true);
+            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
         break;
     case 1:      
-        Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.447f, 0.463f));
-        Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f), true);
-        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+        if (ending_game == 1) {
+            Text::AddRaw("Defeat", 0.75f, 0.1f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f));
+            Text::AddRaw("(Click to return to menu)", 0.775f , 0.0f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
+        else if (ending_game == 2) {
+            Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.447f, 0.463f));
+            Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f), true);
+            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }     
         break;
     case 2:
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
@@ -535,11 +550,7 @@ inline void play_init() {
         StaticObject::AddItem(10, -0.5f, 0.7f);
         StaticObject::AddItem(10, -0.8f, 0.7f);
     }
-    if (ending_game != 2) {
-        //dowal dodatkowe obiekty informujace od wygranej przegranej na srodku ekranu
-        //game_state = main_menu;
-        main_menu_init();
-    }
+   
 }
 inline void exit_program_init() {
     game_state = exit_program;
@@ -574,14 +585,17 @@ void processInput(GLFWwindow* window)
         SCR_WIDTH = 800; SCR_HEIGHT = 450;
         glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
     }
+    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
+        Gracz::next_move = 0;//random
+    }
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-        StaticObject::Add(texture_box, mx, my, 0);
+        Gracz::next_move = 1;//raise
     }
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        StaticObject::Add(texture_box, mx, my, 1);
+        Gracz::next_move = 2;//call
     }
     if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-        StaticObject::Add(texture_box, mx, my, 2);
+        Gracz::next_move = 3;//fold
     }
     //OLD STATES
     mouse_old_state = mouse_state;

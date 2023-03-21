@@ -27,6 +27,7 @@ public:
 class Gracz {
 	int credits;
 public:
+	static int next_move;
 	bool allin;
 	bool checks;
 	int gave_to_pool;
@@ -55,6 +56,7 @@ public:
 	static int minimal_raise;
 	static int raise;
 	static bool game_started;
+	static bool first_round;
 	static bool enemy_turn;
 	static int checked_cards;
 	static int whowins; //0=player 1=enemy 2=none

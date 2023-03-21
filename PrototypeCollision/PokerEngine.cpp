@@ -64,6 +64,7 @@ const std::vector<Karta>& Karta::get_komplet() {
 //GRACZ
 std::vector<Gracz> Gracz::graczList;
 int starting_credits = 1000;
+int Gracz::next_move = 0;
 void Gracz::add_credits(int _credits) {
 	credits += _credits;
 }
@@ -82,7 +83,13 @@ void Gracz::call(int _caller) {
 	int enemy = 1 - _caller;
 	//jesli caller dal mniej niz drugi to musi doplacic
 	if (Gracz::graczList[_caller].gave_to_pool < Gracz::graczList[enemy].gave_to_pool) {
-		give_to_pool(Gracz::graczList[enemy].gave_to_pool - Gracz::graczList[_caller].gave_to_pool);
+		int align_amount = Gracz::graczList[enemy].gave_to_pool - Gracz::graczList[_caller].gave_to_pool;
+		if (align_amount < Gracz::graczList[_caller].credits) {//ma wystarczajaco kredytow by wyrownac stawke
+			give_to_pool(Gracz::graczList[enemy].gave_to_pool - Gracz::graczList[_caller].gave_to_pool);
+		}
+		else {//nie ma
+			give_to_pool(Gracz::graczList[_caller].credits);
+		}
 		if(_caller){ Game::enemy_desc = "Enemy calls."; }
 	}
 	else if (_caller) { Game::enemy_desc = "Enemy checks."; }
@@ -109,8 +116,28 @@ void Gracz::bot_action() {
 	//	raise((r / 2) * 100);
 	//	Game::enemy_desc = "Enemy raised by " + std::to_string((r / 2) * 100) + ".";
 	//}
-	call(1);
-	//fold(1);
+	if (next_move == 0) {
+		next_move = (rand() % 3) + 1;
+	}
+	int pom = (credits / 100) / 2;
+	if (pom == 0) { pom = 1; }
+	int rv = rand() % pom;
+	switch (next_move) {
+	case 0:
+		break;
+	case 1:
+		raise(rv * 100);
+		Game::enemy_desc = "Enemy raised by " + std::to_string(rv*100) + ".";
+		break;
+	case 2:
+		call(1);
+		break;	
+	case 3:
+		fold(1);
+		break;
+	}
+
+
 
 }
 
@@ -128,6 +155,7 @@ int Game::starting_credits = 5000;
 int Game::minimal_raise = 100;
 int Game::raise = 100;
 bool Game::game_started = false;
+bool Game::first_round = true;
 bool Game::enemy_turn = false;
 
 int Game::checked_cards = 0;
@@ -173,13 +201,20 @@ void Game::end_round(int _winner) {
 	clear_pool();
 	game_started = false;
 	whowins = _winner;
-	Game::enemy_desc = "New cards dealt.";
+	//Game::enemy_desc = "New cards dealt.";
 	if (Gracz::graczList[enemy].get_credits() == 0) {//bankrut - koniec gry
 		//end_game(_winner);
 		ending_game = _winner;
 	}
 }
 void Game::end_game(int _winner) {
+	game_started = false;
+	first_round = true;
+	ending_game = 2;
+	whowins = 2;
+	Gracz::graczList.clear();
+	Gracz::graczList.push_back(Gracz());
+	Gracz::graczList.push_back(Gracz());
 	if (_winner == 0) { std::cout << "Wygrales!" << std::endl; }
 	else { std::cout << "Przegrales!" << std::endl; }
 	//game_state = main_menu
