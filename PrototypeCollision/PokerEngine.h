@@ -14,8 +14,8 @@ class Karta {
 	static void set_rewers(int);
 	Karta(kolor, numer);
 public:
-	int get_kolor();
-	int get_numer();
+	int get_kolor() const;
+	int get_numer() const;
 	static const std::vector<Karta>& get_komplet();
 	static void KartaInit();
 	static int get_rewers();
@@ -41,7 +41,7 @@ public:
 	void fold(int);
 	void bot_action();
 	void give_to_pool(int);
-	
+	int get_power();
 
 };
 //GAME czy ta klasa wgl jest potrzebna?

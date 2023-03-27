@@ -51,10 +51,10 @@ Karta::Karta(kolor _k, numer _n) : k(_k), n(_n) {
 void Karta::KartaInit() {
 	stworz_komplet(komplet);
 }
-int Karta::get_kolor() {
+int Karta::get_kolor() const{
 	return (int)k;
 }
-int Karta::get_numer() {
+int Karta::get_numer() const{
 	return (int)n;
 }
 const std::vector<Karta>& Karta::get_komplet() {
@@ -146,7 +146,55 @@ void Gracz::give_to_pool(int _v) {
 	gave_to_pool += _v;
 	add_credits(-_v);
 }
+int Gracz::get_power() {//oblicz najlepsza kombinacje kart
+	//high card = 1
+	//one pair = 2 (ten sam numer)
+	//two pairs = 3 (ten sam numer)
+	//three of a kind = 4 (ten sam numer)
+	//straight = 5 (5 kart ten sam kolor niepokolei)
+	//flush = 6 (wszystkie w tym samym kolorze)
+	//full house = 7 (3 kart z tym samym numerem A + 2 karty z tym samym numerem B)
+	//straight flush = 8 (5 kart ten sam kolor pokolei)
+	//royal flush = 9 (5 kart pokolei w tym samym kolorze najwyzsze karty)
+	std::vector<Karta> karty,mozliwe,najlepsze;
+	for (int i = 0; i < 5; i++) {
+		karty.push_back(Game::stol.at(i));
+	}
+	karty.push_back(reka.at(0));
+	karty.push_back(reka.at(1));
+	//5 kart z 7 mozemy wybrac na 21 sposobow
+	//wybierz 5 z 7 kart
+	for (int i = 0; i < 7;i++) {//wywal karte A o indeksie i
+		for (int j = 0; j < 6; j++) {//wywal karte B o indeksie j
+			if (j == i) { continue; }
+			
+			//stworz ulozenie
+			for (int k = 0; k < 7; k++) {
+				if(k != i && k != j){ mozliwe.push_back(karty.at(k)); }				
+			}
+			//KROK 1 czy sa pokolei?
+			std::sort(mozliwe.begin(), mozliwe.end(), [](const Karta& lewa, const Karta& prawa) ->bool { return lewa.get_numer() < prawa.get_numer(); });
+			bool pokolei = true;
+			for (int i = 0; i < 4; i++) {
+				if (mozliwe.at(i + 1).get_numer() - mozliwe.at(i).get_numer() == 1) pokolei = false;
+			}
 
+			//KROK 2 czy sa w tym samym kolorze?
+			bool jedenkolor = false;
+			for (int i = 0; i < 4; i++) {
+				if (std::equal(mozliwe.begin(), mozliwe.end(), [i](const Karta& lewa) ->bool { return lewa.get_kolor() == i; })) { jedenkolor = true; }
+			}
+			//KROK 3 czy jest czworka?
+			//KROK 4 czy jest trojka numerow A i dwojka numerow B? ( a moze lepiej najpierw znalesc pare?)
+			//zrobic jakis konstruktor dla kart do testow!
+			mozliwe.clear();
+		}
+
+	}
+	return 0;
+
+	
+}
 //GAME
 int Game::pool = 0;
 int Game::dealer_option = 1;

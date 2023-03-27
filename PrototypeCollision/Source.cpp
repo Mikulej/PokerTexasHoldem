@@ -382,6 +382,7 @@ inline void play_handler() {
         else {//RUCHA GRACZA
             if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
                 if (mouse_click()) { //raise confirm
+                    Gracz::graczList[0].get_power();
                     Gracz::graczList[0].raise(Game::raise);
                     Game::enemy_turn = true;
                     play_init();
