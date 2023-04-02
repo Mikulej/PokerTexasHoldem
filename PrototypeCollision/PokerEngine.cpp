@@ -48,6 +48,9 @@ void Karta::stworz_komplet(std::vector<Karta>& komplet) {
 Karta::Karta(kolor _k, numer _n) : k(_k), n(_n) {
 
 }
+Karta::Karta(int _k, int _n) :k((kolor)_k),n((numer)_n){
+
+}
 void Karta::KartaInit() {
 	stworz_komplet(komplet);
 }
@@ -147,7 +150,7 @@ void Gracz::give_to_pool(int _v) {
 	add_credits(-_v);
 }
 int Gracz::get_power() {//oblicz najlepsza kombinacje kart
-	//high card = 1
+	//high card = 2-14
 	//one pair = 2 (ten sam numer)
 	//two pairs = 3 (ten sam numer)
 	//three of a kind = 4 (ten sam numer)
@@ -157,11 +160,19 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 	//straight flush = 8 (5 kart ten sam kolor pokolei)
 	//royal flush = 9 (5 kart pokolei w tym samym kolorze najwyzsze karty)
 	std::vector<Karta> karty,mozliwe,najlepsze;
-	for (int i = 0; i < 5; i++) {
-		karty.push_back(Game::stol.at(i));
-	}
+	
+	//for (int i = 0; i < 5; i++) {
+	//	karty.push_back(Game::stol.at(i));
+	//}
 	karty.push_back(reka.at(0));
 	karty.push_back(reka.at(1));
+	//testowe karty
+	karty.push_back(Karta(2,2));
+	karty.push_back(Karta(2, 1));
+	karty.push_back(Karta(2, 3));
+	karty.push_back(Karta(2, 4));
+	karty.push_back(Karta(2, 5));
+	//karty.push_back();
 	//5 kart z 7 mozemy wybrac na 21 sposobow
 	//wybierz 5 z 7 kart
 	for (int i = 0; i < 7;i++) {//wywal karte A o indeksie i
@@ -173,18 +184,42 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 				if(k != i && k != j){ mozliwe.push_back(karty.at(k)); }				
 			}
 			//KROK 1 czy sa pokolei?
-			std::sort(mozliwe.begin(), mozliwe.end(), [](const Karta& lewa, const Karta& prawa) ->bool { return lewa.get_numer() < prawa.get_numer(); });
-			bool pokolei = true;
+			std::sort(mozliwe.begin(), mozliwe.end(), [](const Karta& lewa, const Karta& prawa) ->bool { 
+				int num_left = lewa.get_numer();
+				if (num_left == 1) { num_left = 14; }
+				int num_right = prawa.get_numer();
+				if (num_right == 1) { num_right = 14; }
+				return num_left < num_right; });
+			bool pokolei = true;	
 			for (int i = 0; i < 4; i++) {
-				if (mozliwe.at(i + 1).get_numer() - mozliwe.at(i).get_numer() == 1) pokolei = false;
+				int num_left = mozliwe.at(i + 1).get_numer();	//uwzglednij asa (ma moc 1)
+				if (num_left == 1) { num_left = 14; }
+				int num_right = mozliwe.at(i).get_numer();
+				if (num_right == 1) { num_right = 14; }
+				if (num_left - num_right != 1) pokolei = false;
 			}
-
 			//KROK 2 czy sa w tym samym kolorze?
-			bool jedenkolor = false;
-			for (int i = 0; i < 4; i++) {
-				if (std::equal(mozliwe.begin(), mozliwe.end(), [i](const Karta& lewa) ->bool { return lewa.get_kolor() == i; })) { jedenkolor = true; }
+			bool jedenkolor = true;
+			int kolor = mozliwe.at(0).get_kolor();
+			for (auto k : mozliwe) {
+				if (k.get_kolor() != kolor) { jedenkolor = false; }
 			}
-			//KROK 3 czy jest czworka?
+			//KROK 3 policz powtorki kart // czy jest czworka?
+			//int asy = 0, dwojki = 0, trojki = 0, czworki = 0, piatki = 0, szostki = 0, siodemki = 0, osemki = 0, dziewiatki = 0, dziesiatki = 0, walety = 0, damy = 0, krole = 0;
+			int powtorzenia[13] = { 0 };
+			for (int i = 0; i < 5; i++) {
+				int numer = mozliwe.at(i).get_numer();
+				if (numer == 1) { numer = 14; }
+				powtorzenia[numer - 2]++;
+		
+			}
+			//znajdz max
+			int max = 0, max_id = 0;//ilosc powtorek // id na te miejsce w powtorzenia[]
+			for (int i = 0; i < 12; i++) {
+				if (powtorzenia[i] > max || (powtorzenia[i] >= max && i > max_id)) {//zastap jesli indeks jest wyzszy(para asow jest lepsza niz para dwojek)
+					max = powtorzenia[i]; max_id = i;
+				}
+			}
 			//KROK 4 czy jest trojka numerow A i dwojka numerow B? ( a moze lepiej najpierw znalesc pare?)
 			//zrobic jakis konstruktor dla kart do testow!
 			mozliwe.clear();

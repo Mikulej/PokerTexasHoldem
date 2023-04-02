@@ -5,6 +5,7 @@
 #include <algorithm>
 //KARTA
 class Karta {
+	friend class Gracz;//tylko do testow przy tworzeniu sztucznej talii kart! get_power()
 	static std::vector<Karta> komplet;
 	static void stworz_komplet(std::vector<Karta>&);
 	static int rewers;//{icefire = 1,science=2,fish=4,nuts=5,rose=10 }
@@ -13,6 +14,7 @@ class Karta {
 	enum numer { as = 1, dwa, trzy, cztery, piec, szesc, siedem, osiem, dziewiec, dziesiec, walet, dama, krol } n;
 	static void set_rewers(int);
 	Karta(kolor, numer);
+	Karta(int, int);
 public:
 	int get_kolor() const;
 	int get_numer() const;
@@ -27,6 +29,7 @@ public:
 class Gracz {
 	int credits;
 public:
+	
 	static int next_move;
 	bool allin;
 	bool checks;
