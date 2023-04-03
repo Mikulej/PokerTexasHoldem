@@ -149,32 +149,22 @@ void Gracz::give_to_pool(int _v) {
 	gave_to_pool += _v;
 	add_credits(-_v);
 }
-int Gracz::get_power() {//oblicz najlepsza kombinacje kart
-	//high card = 2-14
-	//one pair = 2 (ten sam numer)
-	//two pairs = 3 (ten sam numer)
-	//three of a kind = 4 (ten sam numer)
-	//straight = 5 (5 kart ten sam kolor niepokolei)
-	//flush = 6 (wszystkie w tym samym kolorze)
-	//full house = 7 (3 kart z tym samym numerem A + 2 karty z tym samym numerem B)
-	//straight flush = 8 (5 kart ten sam kolor pokolei)
-	//royal flush = 9 (5 kart pokolei w tym samym kolorze najwyzsze karty)
+void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 	std::vector<Karta> karty,mozliwe,najlepsze;
 	int highest_power = -1, highest_sub_power = -1;
-	//for (int i = 0; i < 5; i++) {
-	//	karty.push_back(Game::stol.at(i));
-	//}
+	for (int i = 0; i < 5; i++) {
+		karty.push_back(Game::stol.at(i));
+	}
 	karty.push_back(reka.at(0));
 	karty.push_back(reka.at(1));
 	//testowe karty
-	karty.push_back(Karta(0,4));
-	karty.push_back(Karta(3, 4));
-	karty.push_back(Karta(2, 3));
-	karty.push_back(Karta(2, 4));
-	karty.push_back(Karta(1, 3));
+	//karty.push_back(Karta(0,4));
+	//karty.push_back(Karta(3, 4));
+	//karty.push_back(Karta(2, 3));
+	//karty.push_back(Karta(2, 4));
+	//karty.push_back(Karta(1, 3));
 	//karty.push_back();
-	//5 kart z 7 mozemy wybrac na 21 sposobow
-	//wybierz 5 z 7 kart
+	//wybierz 5 z 7 kart (jest na 21 sposobow)
 	for (int i = 0; i < 7;i++) {//wywal karte A o indeksie i
 		for (int j = 0; j < 6; j++) {//wywal karte B o indeksie j
 			if (j == i) { continue; }
@@ -204,7 +194,7 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 			for (auto k : mozliwe) {
 				if (k.get_kolor() != kolor) { jedenkolor = false; }
 			}
-			//KROK 3 policz powtorki kart // czy jest czworka?
+			//KROK 3 policz powtorki kart 
 			//int asy = 0, dwojki = 0, trojki = 0, czworki = 0, piatki = 0, szostki = 0, siodemki = 0, osemki = 0, dziewiatki = 0, dziesiatki = 0, walety = 0, damy = 0, krole = 0;
 			int powtorzenia[13] = { 0 };
 			for (int i = 0; i < 5; i++) {
@@ -228,12 +218,15 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 					max2 = powtorzenia[i]; max2_id = i;
 				}
 			}
+
 			//Przydziel moc
 			int power, sub_power;
-			if (pokolei && jedenkolor && mozliwe[4].get_numer() == 14) { power = 9; sub_power = 1; } //royal flush
-			else if (pokolei && jedenkolor) { 
-				power = 8; sub_power = mozliwe[4].get_numer(); //DODAJ TU WARUNEK Z ASEM
-			} //straight flush
+			if (pokolei && jedenkolor && mozliwe[4].get_numer() == 1) { power = 9; sub_power = 1; } //royal flush
+			else if (pokolei && jedenkolor) { //straight flush
+				power = 8; 
+				int num = mozliwe[4].get_numer(); if (num == 1) { num = 14; }
+				sub_power = num;
+			} 
 			else if (max1 == 4)	{//czworka
 			power = 7; 
 			int num_big = mozliwe[4].get_numer(); if (num_big == 1) { num_big = 14; }
@@ -256,28 +249,66 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 					rzad *= 10;
 				}
 			}
-			else if (pokolei) { power = 4; } //strit sub_power=najwyzsza karta
+			else if (pokolei) { //strit 
+				power = 4; 
+				int num = mozliwe[4].get_numer(); if (num == 1) { num = 14; }
+				sub_power = num;
+			} 
 			else if (max1 == 3) {//trojka
 				power = 3;
+				int rzad = 1;
+				sub_power = 0;
+				for (int i = 0; i < 5; i++) {
+					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= 10;
+				}
 			}
-			else if (max1 == 2 && max2 == 2) { power = 2; }//dwie pary
-			else if (max1 == 2) { power = 1; }
-			else { power = 0; }//high card sub_power=najwyzsza karta
+			else if (max1 == 2 && max2 == 2) {//dwie pary
+				power = 2; 
+				int rzad = 1;
+				sub_power = 0;
+				for (int i = 0; i < 5; i++) {
+					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= 10;
+				}
+			}
+			else if (max1 == 2) { //para
+				power = 1;
+				int rzad = 1;
+				sub_power = 0;
+				for (int i = 0; i < 5; i++) {
+					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= 10;
+				}
+			}
+			else { //high card
+				power = 0; 
+				int rzad = 1;
+				sub_power = 0;
+				for (int i = 0; i < 5; i++) {
+					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= 10;
+				}
+			}
 
 			if ((power > highest_power)||(power == highest_power && sub_power > highest_sub_power)) {
 				highest_power = power;
 				highest_sub_power = sub_power;
 				najlepsze = mozliwe;
 			}
-			//zrobic wlasny typ zwracany ktorym mialby int oraz 2 pola reprezentujace 2 najwyzsze karty
 			mozliwe.clear();
 		}
 
 	}
-	return 0;
-
-	
+	Gracz::power = highest_power;
+	Gracz::sub_power = highest_sub_power;
 }
+int Gracz::get_power(void) {return power;}
+int Gracz::get_sub_power(void) { return sub_power; }
 //GAME
 int Game::pool = 0;
 int Game::dealer_option = 1;

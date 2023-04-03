@@ -28,6 +28,8 @@ public:
 //GRACZ
 class Gracz {
 	int credits;
+	int power;
+	int sub_power;
 public:
 	
 	static int next_move;
@@ -44,7 +46,9 @@ public:
 	void fold(int);
 	void bot_action();
 	void give_to_pool(int);
-	int get_power();
+	void calculate_power();
+	int get_power(void);
+	int get_sub_power(void);
 
 };
 //GAME czy ta klasa wgl jest potrzebna?

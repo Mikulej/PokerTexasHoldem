@@ -382,7 +382,7 @@ inline void play_handler() {
         else {//RUCHA GRACZA
             if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
                 if (mouse_click()) { //raise confirm
-                    Gracz::graczList[0].get_power();
+                   // Gracz::graczList[0].calculate_power();
                     Gracz::graczList[0].raise(Game::raise);
                     Game::enemy_turn = true;
                     play_init();
@@ -471,7 +471,23 @@ inline void play_init() {
     }
 
     if (Game::checked_cards == 4) {
-        Game::end_round(1);//ustal sposob wyboru wygrywajacego
+        //wybor wygrywajacego
+        Gracz::graczList[0].calculate_power();
+        Gracz::graczList[1].calculate_power();
+        int power0 = Gracz::graczList[0].get_power();
+        int power1 = Gracz::graczList[1].get_power();
+        int sub_power0 = Gracz::graczList[0].get_sub_power();
+        int sub_power1 = Gracz::graczList[1].get_sub_power();
+        if ((power0 > power1) || (power0 == power1 && sub_power0 > sub_power1)) {
+            Game::end_round(0);
+        }
+        else if ((power1 > power0) || (power0 == power1 && sub_power1 > sub_power0)) {
+            Game::end_round(1);
+        }
+        else {//remis
+
+        }
+        
     }
 
     //BUTTONS
