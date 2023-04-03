@@ -160,18 +160,18 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 	//straight flush = 8 (5 kart ten sam kolor pokolei)
 	//royal flush = 9 (5 kart pokolei w tym samym kolorze najwyzsze karty)
 	std::vector<Karta> karty,mozliwe,najlepsze;
-	
+	int highest_power = -1, highest_sub_power = -1;
 	//for (int i = 0; i < 5; i++) {
 	//	karty.push_back(Game::stol.at(i));
 	//}
 	karty.push_back(reka.at(0));
 	karty.push_back(reka.at(1));
 	//testowe karty
-	karty.push_back(Karta(2,2));
-	karty.push_back(Karta(2, 1));
+	karty.push_back(Karta(0,4));
+	karty.push_back(Karta(3, 4));
 	karty.push_back(Karta(2, 3));
 	karty.push_back(Karta(2, 4));
-	karty.push_back(Karta(2, 5));
+	karty.push_back(Karta(1, 3));
 	//karty.push_back();
 	//5 kart z 7 mozemy wybrac na 21 sposobow
 	//wybierz 5 z 7 kart
@@ -214,14 +214,62 @@ int Gracz::get_power() {//oblicz najlepsza kombinacje kart
 		
 			}
 			//znajdz max
-			int max = 0, max_id = 0;//ilosc powtorek // id na te miejsce w powtorzenia[]
-			for (int i = 0; i < 12; i++) {
-				if (powtorzenia[i] > max || (powtorzenia[i] >= max && i > max_id)) {//zastap jesli indeks jest wyzszy(para asow jest lepsza niz para dwojek)
-					max = powtorzenia[i]; max_id = i;
+			int max1 = 0, max1_id = 0;//ilosc powtorek // id na te miejsce w powtorzenia[]
+			for (int i = 0; i < 13; i++) {
+				if (powtorzenia[i] > max1 || (powtorzenia[i] >= max1 && i > max1_id)) {//zastap jesli indeks jest wyzszy(para asow jest lepsza niz para dwojek)
+					max1 = powtorzenia[i]; max1_id = i;
 				}
 			}
-			//KROK 4 czy jest trojka numerow A i dwojka numerow B? ( a moze lepiej najpierw znalesc pare?)
-			//zrobic jakis konstruktor dla kart do testow!
+			//znajdz druga najwieksza wielokrotnosc
+			int max2 = 0, max2_id = 0;
+			for (int i = 0; i < 13; i++) {
+				if (i == max1_id) { continue; }
+				if (powtorzenia[i] > max2 || (powtorzenia[i] >= max2 && i > max2_id)) {//zastap jesli indeks jest wyzszy(para asow jest lepsza niz para dwojek)
+					max2 = powtorzenia[i]; max2_id = i;
+				}
+			}
+			//Przydziel moc
+			int power, sub_power;
+			if (pokolei && jedenkolor && mozliwe[4].get_numer() == 14) { power = 9; sub_power = 1; } //royal flush
+			else if (pokolei && jedenkolor) { 
+				power = 8; sub_power = mozliwe[4].get_numer(); //DODAJ TU WARUNEK Z ASEM
+			} //straight flush
+			else if (max1 == 4)	{//czworka
+			power = 7; 
+			int num_big = mozliwe[4].get_numer(); if (num_big == 1) { num_big = 14; }
+			int num_small = mozliwe[0].get_numer(); if (num_small == 1) { num_small = 14; }
+			sub_power = (num_big * 1000) + num_small; 
+			} 
+			else if (max1 == 3 && max2 == 2) {//2+3
+				power = 6; 
+				int num_big = mozliwe[4].get_numer(); if (num_big == 1) { num_big = 14; }
+				int num_small = mozliwe[0].get_numer(); if (num_small == 1) { num_small = 14; }
+				sub_power = (num_big * 1000) + num_small;
+			}
+			else if (jedenkolor) { //flush
+				power = 5;
+				int rzad = 1;
+				sub_power = 0;
+				for (int i = 0; i < 5; i++) {
+					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= 10;
+				}
+			}
+			else if (pokolei) { power = 4; } //strit sub_power=najwyzsza karta
+			else if (max1 == 3) {//trojka
+				power = 3;
+			}
+			else if (max1 == 2 && max2 == 2) { power = 2; }//dwie pary
+			else if (max1 == 2) { power = 1; }
+			else { power = 0; }//high card sub_power=najwyzsza karta
+
+			if ((power > highest_power)||(power == highest_power && sub_power > highest_sub_power)) {
+				highest_power = power;
+				highest_sub_power = sub_power;
+				najlepsze = mozliwe;
+			}
+			//zrobic wlasny typ zwracany ktorym mialby int oraz 2 pola reprezentujace 2 najwyzsze karty
 			mozliwe.clear();
 		}
 
