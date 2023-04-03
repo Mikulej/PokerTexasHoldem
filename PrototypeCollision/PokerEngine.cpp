@@ -321,7 +321,7 @@ bool Game::first_round = true;
 bool Game::enemy_turn = false;
 
 int Game::checked_cards = 0;
-int Game::whowins = 2; //0=player 1=enemy 2=none
+int Game::whowins = 2; //0=player 1=enemy 2=none 3=draw
 int Game::won_prize = 0;
 std::string Game::enemy_desc = "New cards dealt.";
 std::vector<Karta> Game::talia;
@@ -357,6 +357,15 @@ void Game::blinds(int _d) {//przydziel stawki startowe
 	}
 }
 void Game::end_round(int _winner) {
+	if(_winner == 2){
+		Gracz::graczList[0].add_credits(Gracz::graczList[0].gave_to_pool);
+		Gracz::graczList[1].add_credits(Gracz::graczList[1].gave_to_pool);
+		won_prize = 0;
+		clear_pool();
+		game_started = false;
+		whowins = 3;
+		return;
+	}
 	int enemy = 1 - _winner;
 	won_prize = pool;
 	Gracz::graczList[_winner].add_credits(Game::get_pool());

@@ -199,7 +199,7 @@ time_t start, now;
 inline bool mouse_click() {
     return mouse_state == GLFW_PRESS && mouse_old_state == GLFW_RELEASE;
 }
-int ending_game = 2; // 0 - gre wygral gracz 1 - gre wygral komputer 2 - gra sie toczy
+int ending_game = 2; // 0 - gre wygral gracz 1 - gre wygral komputer 2 - gra sie toczy 3 - remis
 //INTERFACE HANDLERS
 inline void main_menu_handler() {
     if (!StaticObject::collisionList.empty()) {
@@ -456,15 +456,14 @@ inline void play_init() {
     }
     //NO CREDITS CONDITION
     if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-        std::cout << "Wszystkie karty!" << std::endl;
+        //std::cout << "Wszystkie karty!" << std::endl;
         Game::checked_cards = 4;
         Gracz::graczList[0].checks = false;
         Gracz::graczList[1].checks = false;
-        //Game::end_round(1);
     }
     else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
         //UWAGA uwzglednij sytuacje gdy robimy all in!
-            std::cout << "Wiecej kart!" << std::endl;
+            //std::cout << "Wiecej kart!" << std::endl;
             Game::checked_cards++;
             Gracz::graczList[0].checks = false;
             Gracz::graczList[1].checks = false;
@@ -485,7 +484,7 @@ inline void play_init() {
             Game::end_round(1);
         }
         else {//remis
-
+            Game::end_round(2);
         }
         
     }
@@ -528,6 +527,10 @@ inline void play_init() {
     case 2:
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
         Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+        break;
+    case 3:
+        Text::AddRaw("Draw!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.8f, 0.8f, 0.8f));
+        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         break;
     }
 
