@@ -144,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BotAI.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="PokerEngine.h" />
     <ClInclude Include="shader.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Text.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BotAI.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="PokerEngine.cpp" />

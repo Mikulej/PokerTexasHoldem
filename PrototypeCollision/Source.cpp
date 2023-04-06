@@ -345,7 +345,6 @@ inline void options_handler() {
 }
 #define WAIT_TIME 3 //czas myslenia przeciwnika
 inline void play_handler() {
-    //std::cout << "whowins=" << Game::whowins << std::endl;
     if (Game::whowins != 2) {//KONIEC RUNDY
         if (mouse_click()) {            
             if (ending_game != 2) { //KONIEC GRY
@@ -353,11 +352,6 @@ inline void play_handler() {
                 main_menu_init();
                 return;
             }
-            
-            //Game::enemy_desc = "New cards dealt.";
-          /*  Game::end_round(Game::whowins);
-            play_init();   
-            Game::whowins = 2;*/
             Game::whowins = 2;
             play_init();
             return;
@@ -382,7 +376,6 @@ inline void play_handler() {
         else {//RUCHA GRACZA
             if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
                 if (mouse_click()) { //raise confirm
-                   // Gracz::graczList[0].calculate_power();
                     Gracz::graczList[0].raise(Game::raise);
                     Game::enemy_turn = true;
                     play_init();
@@ -456,14 +449,12 @@ inline void play_init() {
     }
     //NO CREDITS CONDITION
     if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-        //std::cout << "Wszystkie karty!" << std::endl;
         Game::checked_cards = 4;
         Gracz::graczList[0].checks = false;
         Gracz::graczList[1].checks = false;
     }
     else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
         //UWAGA uwzglednij sytuacje gdy robimy all in!
-            //std::cout << "Wiecej kart!" << std::endl;
             Game::checked_cards++;
             Gracz::graczList[0].checks = false;
             Gracz::graczList[1].checks = false;
@@ -544,7 +535,6 @@ inline void play_init() {
     Text::AddRaw("Dealer:", 0.5f, -0.9f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f)); 
     if (Game::whos_dealer == 0) Text::AddRaw("You", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     else if (Game::whos_dealer == 1)  Text::AddRaw("Enemy", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
-    //std::cout << StaticObject::collisionList.size() << std::endl;
 
     //KARTA NR1
     if (Game::checked_cards == 0) { StaticObject::AddItem(10, -0.8f, 0.0f); }

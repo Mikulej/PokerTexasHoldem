@@ -7,7 +7,7 @@
 class Karta {
 	friend class Gracz;//tylko do testow przy tworzeniu sztucznej talii kart! get_power()
 	static std::vector<Karta> komplet;
-	static void stworz_komplet(std::vector<Karta>&);
+	
 	static int rewers;//{icefire = 1,science=2,fish=4,nuts=5,rose=10 }
 	static int rewers_id;
 	enum kolor { wino, czerwo, zoladz, dzwonek } k;
@@ -16,6 +16,7 @@ class Karta {
 	Karta(kolor, numer);
 	Karta(int, int);
 public:
+	static void stworz_komplet(std::vector<Karta>&);
 	int get_kolor() const;
 	int get_numer() const;
 	static const std::vector<Karta>& get_komplet();
@@ -49,12 +50,12 @@ public:
 	void calculate_power();
 	int get_power(void);
 	int get_sub_power(void);
-
+	//do symulacji
+	void random_action(void);
+	void sim_give_to_pool(int _val,int &_pool);
 };
 //GAME czy ta klasa wgl jest potrzebna?
 class Game {
-
-
 public:
 	static int pool;
 	static int dealer_option;//wybor
