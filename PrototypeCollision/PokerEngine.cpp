@@ -149,29 +149,45 @@ void Gracz::give_to_pool(int _v) {
 	gave_to_pool += _v;
 	add_credits(-_v);
 }
+#define RZAD_NUM 20 //minimum 20 2 A i KQ gdy na stole jest wspolna trojka daje remis
 void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
-	std::vector<Karta> karty,mozliwe,najlepsze;
+	std::vector<Karta> karty,mozliwe,najlepsze,sorted_reka;
 	int highest_power = -1, highest_sub_power = -1;
+	power = 0; sub_power = 0;
 	for (int i = 0; i < 5; i++) {
 		karty.push_back(Game::stol.at(i));
 	}
 	karty.push_back(reka.at(0));
 	karty.push_back(reka.at(1));
+	enum kolor { wino, czerwo, zoladz, dzwonek } k;//tylko do testow mozna usunac
 	//testowe karty
-	//karty.push_back(Karta(0,4));
-	//karty.push_back(Karta(3, 4));
-	//karty.push_back(Karta(2, 3));
-	//karty.push_back(Karta(2, 4));
-	//karty.push_back(Karta(1, 3));
-	//karty.push_back();
+	//karty.push_back(Karta(wino, 13));
+	//karty.push_back(Karta(zoladz, 7));
+	//karty.push_back(Karta(zoladz, 13));
+	//karty.push_back(Karta(wino, 12));
+	//karty.push_back(Karta(zoladz, 12));
+
+	//karty.push_back(Karta(dzwonek, 7));
+	//karty.push_back(Karta(zoladz, 10));
+
+	//sorted_reka.push_back(Karta(dzwonek, 7));
+	//sorted_reka.push_back(Karta(zoladz, 10));
+	//int przejrzenia = 0;
+	//zmienna pomocnicza posortowana reka
+	sorted_reka.push_back(reka[0]);
+	sorted_reka.push_back(reka[1]);
+	std::sort(sorted_reka.begin(), sorted_reka.end(), [](const Karta& lewa, const Karta& prawa) ->bool {
+		int num_left = lewa.get_numer();
+		if (num_left == 1) { num_left = 14; }
+		int num_right = prawa.get_numer();
+		if (num_right == 1) { num_right = 14; }
+		return num_left < num_right; });
 	//wybierz 5 z 7 kart (jest na 21 sposobow)
 	for (int i = 0; i < 7;i++) {//wywal karte A o indeksie i
-		for (int j = 0; j < 6; j++) {//wywal karte B o indeksie j
-			if (j == i) { continue; }
-			
+		for (int j = i + 1; j < 7; j++) {//wywal karte B o indeksie j			
 			//stworz ulozenie
 			for (int k = 0; k < 7; k++) {
-				if(k != i && k != j){ mozliwe.push_back(karty.at(k)); }				
+				if(k != i && k != j){ mozliwe.push_back(karty.at(k));}					
 			}
 			//KROK 1 czy sa pokolei?
 			std::sort(mozliwe.begin(), mozliwe.end(), [](const Karta& lewa, const Karta& prawa) ->bool { 
@@ -196,7 +212,7 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 			}
 			//KROK 3 policz powtorki kart 
 			//int asy = 0, dwojki = 0, trojki = 0, czworki = 0, piatki = 0, szostki = 0, siodemki = 0, osemki = 0, dziewiatki = 0, dziesiatki = 0, walety = 0, damy = 0, krole = 0;
-			int powtorzenia[13] = { 0 };
+			int powtorzenia[13] = { 0 }; //[0]dwojki//[1]trojki...//...//[11]krole//[12]asy
 			for (int i = 0; i < 5; i++) {
 				int numer = mozliwe.at(i).get_numer();
 				if (numer == 1) { numer = 14; }
@@ -221,77 +237,137 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 
 			//Przydziel moc
 			int power, sub_power;
-			if (pokolei && jedenkolor && mozliwe[4].get_numer() == 1) { power = 9; sub_power = 1; } //royal flush
-			else if (pokolei && jedenkolor) { //straight flush
+			if (pokolei && jedenkolor && mozliwe[4].get_numer() == 1) { power = 9; sub_power = 1; } //royal flush - done
+			else if (pokolei && jedenkolor) { //straight flush - done
+				//priorytet pierwszy numer
+				//reszta kart nie ma znaczenia
 				power = 8; 
 				int num = mozliwe[4].get_numer(); if (num == 1) { num = 14; }
 				sub_power = num;
 			} 
-			else if (max1 == 4)	{//czworka
+			else if (max1 == 4)	{//czworka - done
+				//priorytet ma czworka
+				//potem reszta kart? - nie ma takiej potrzeby
+				//mozliwe ze nie potrzeba liczyc reszty kart bo jedna czworka moze powtorzyc sie tylko raz
+				//maksymalna ilosc graczy majacych czworki to 2 wiec wystarczy porownywac przez numer czorek
+				//nie istnieje sytuacja by dwoch graczy mialo czworke z tym samym numerem
 			power = 7; 
-			int num_big = mozliwe[4].get_numer(); if (num_big == 1) { num_big = 14; }
-			int num_small = mozliwe[0].get_numer(); if (num_small == 1) { num_small = 14; }
-			sub_power = (num_big * 1000) + num_small; 
+			int rzad = 1;
+			sub_power = 0;
+			/*for (int i = 0; i < 2; i++) {
+				int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
+				sub_power += num * rzad;
+				rzad *= RZAD_NUM;
+			}*/
+			int num = max1_id + 2;
+			sub_power += num * rzad;
 			} 
-			else if (max1 == 3 && max2 == 2) {//2+3
+			else if (max1 == 3 && max2 == 2) {//2+3 - done
+				//priorytet ma trojka
+				//potem jest dwojka
+				//reszta kart nie ma znaczenia
 				power = 6; 
-				int num_big = mozliwe[4].get_numer(); if (num_big == 1) { num_big = 14; }
-				int num_small = mozliwe[0].get_numer(); if (num_small == 1) { num_small = 14; }
-				sub_power = (num_big * 1000) + num_small;
+				int rzad = 1;
+				sub_power = 0;
+				int num1 = max1_id + 2;//trojka
+				int num2 = max2_id + 2;//dwojka
+				sub_power += num2 * rzad;//dwojka
+				rzad *= RZAD_NUM;
+				sub_power += num1 * rzad;//trojka
 			}
-			else if (jedenkolor) { //flush
+			else if (jedenkolor) { //flush - done
+				//moze byc tylko w jednymm kolorze
+				//priorytet karty z ktorych sklada sie flush(najwyzsza karta we flush wygrywa)
+				//reszta kart nie ma znaczenia?
 				power = 5;
 				int rzad = 1;
 				sub_power = 0;
+				//for (int i = 0; i < 2; i++) {
+				//	int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
+				//	sub_power += num * rzad;
+				//	rzad *= RZAD_NUM;
+				//}
 				for (int i = 0; i < 5; i++) {
 					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
 					sub_power += num * rzad;
-					rzad *= 10;
+					rzad *= RZAD_NUM;
 				}
 			}
-			else if (pokolei) { //strit 
+			else if (pokolei) { //strit  - done
+				//priorytet najwyzsza karat w strit'cie
+				//reszta kart nie ma znaczenia
 				power = 4; 
+				int rzad = 1;
+				sub_power = 0;
+		/*		for (int i = 0; i < 2; i++) {
+					int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
+					sub_power += num * rzad;
+					rzad *= RZAD_NUM;
+				}*/
 				int num = mozliwe[4].get_numer(); if (num == 1) { num = 14; }
-				sub_power = num;
+				sub_power += num * rzad;
 			} 
-			else if (max1 == 3) {//trojka
+			else if (max1 == 3) {//trojka - done
+				//priorytet ma numer trojki
+				//potem karty w rece
 				power = 3;
 				int rzad = 1;
 				sub_power = 0;
-				for (int i = 0; i < 5; i++) {
-					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+				for (int i = 0; i < 2; i++) {
+					int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
 					sub_power += num * rzad;
-					rzad *= 10;
+					rzad *= RZAD_NUM;
 				}
+				int num = max1_id + 2;
+				sub_power += num * rzad;
 			}
-			else if (max1 == 2 && max2 == 2) {//dwie pary
+			else if (max1 == 2 && max2 == 2) {//dwie pary - done
+				//najwyzszy priorytet ma najwyzsza para
+				//dalej w priorytecie jest druga para
+				//na 1 najwyzsza karta w rece
 				power = 2; 
 				int rzad = 1;
 				sub_power = 0;
-				for (int i = 0; i < 5; i++) {
-					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
-					sub_power += num * rzad;
-					rzad *= 10;
-				}
+				
+				int num = sorted_reka[1].get_numer(); if (num == 1) { num = 14; }
+				sub_power += num * rzad;
+				rzad *= RZAD_NUM;
+				
+				int temp1 = max1_id + 2;
+				int temp2 = max2_id + 2;
+				int num_big, num_small;
+				if (temp1 > temp2) { num_big = temp1; num_small = temp2; }
+				else { num_big = temp2; num_small = temp1; }
+				sub_power += num_small * rzad;
+				rzad *= RZAD_NUM;
+				sub_power += num_big * rzad;
 			}
-			else if (max1 == 2) { //para
+			else if (max1 == 2) { //para - done
+			//priorytet para
+			//potem karty w rece
 				power = 1;
 				int rzad = 1;
 				sub_power = 0;
-				for (int i = 0; i < 5; i++) {
-					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+				for (int i = 0; i < 2; i++) {
+					int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
 					sub_power += num * rzad;
-					rzad *= 10;
+					rzad *= RZAD_NUM;
 				}
+				//max1_id od 0 do 13 ale dodajemy +2 zeby dodalo cokolwiek zamiast cos razy 0 
+				//i jest to +2 a nie +1 zeby przypominalo reszte dodawan do sub_power
+				//czyli (max1_id+2) reprezentuje najczesciej powtarzajacy sie numer w notacji od 2 do 14
+				int num = max1_id + 2;//najwyzszy priorytet ma numer w pary
+				sub_power += num * rzad;
 			}
-			else { //high card
+			else { //high card  - done
 				power = 0; 
 				int rzad = 1;
-				sub_power = 0;
-				for (int i = 0; i < 5; i++) {
-					int num = mozliwe[i].get_numer(); if (num == 1) { num = 14; }
+				sub_power = 0;//stworz na podstawie reki - reszta jest taka sama dla obu graczy
+				for (int i = 0; i < 2; i++) {
+					//trzeba posortowac reke by zrobic liczenie przez rzad
+					int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
 					sub_power += num * rzad;
-					rzad *= 10;
+					rzad *= RZAD_NUM;				
 				}
 			}
 
@@ -301,6 +377,8 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 				najlepsze = mozliwe;
 			}
 			mozliwe.clear();
+			//przejrzenia++;
+			//std::cout << "Przejrzano " << przejrzenia<< "razy " << std::endl;
 		}
 
 	}

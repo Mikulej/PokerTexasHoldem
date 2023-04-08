@@ -51,7 +51,7 @@ void StaticObject::AddItem(int _ID,float _x,float _y,int a,int b) {
 		pom = Add(texture_karty, _x, _y, 0);
 		(*pom).set_color(0); (*pom).original_color = 0;
 		(*pom).set_scale(7.1f / 2.0f, 9.6f / 2.0f);
-		(*pom).set_offset(a, 4-b);
+		(*pom).set_offset(a-1, 4-b);
 		(*pom).set_zoom(13.0f, 5.0f);
 		break;
 	}

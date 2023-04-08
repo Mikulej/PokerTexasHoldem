@@ -343,7 +343,7 @@ inline void options_handler() {
         }
     }
 }
-#define WAIT_TIME 3 //czas myslenia przeciwnika
+#define WAIT_TIME 0 //czas myslenia przeciwnika 3
 inline void play_handler() {
     if (Game::whowins != 2) {//KONIEC RUNDY
         if (mouse_click()) {            
@@ -443,6 +443,7 @@ inline void play_init() {
         Game::raise = Game::minimal_raise;
         Game::checked_cards = 0;
         Game::game_started = true;
+       //Gracz::graczList[0].calculate_power();//TESTOWO USUNAAAAAAAC!!!
     }
     else {
         Game::won_prize = 0;
