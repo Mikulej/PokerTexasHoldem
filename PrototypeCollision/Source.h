@@ -22,6 +22,7 @@
 #include "StaticObject.h"
 #include "Text.h"
 #include "PokerEngine.h"
+#include "BotAI.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H

@@ -195,6 +195,7 @@ int main()
 
 int mouse_state = 0, mouse_old_state = 0;
 bool waiting = false; bool waited = false;
+int fin_min_raise = 0;
 time_t start, now;
 inline bool mouse_click() {
     return mouse_state == GLFW_PRESS && mouse_old_state == GLFW_RELEASE;
@@ -343,7 +344,7 @@ inline void options_handler() {
         }
     }
 }
-#define WAIT_TIME 0 //czas myslenia przeciwnika 3
+#define WAIT_TIME 1 //czas myslenia przeciwnika 3
 inline void play_handler() {
     if (Game::whowins != 2) {//KONIEC RUNDY
         if (mouse_click()) {            
@@ -367,7 +368,9 @@ inline void play_handler() {
             }
             if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
             else {
-                Gracz::graczList[1].bot_action();
+                Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
+               // p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
+                Gracz::graczList[1].bot_action(fin_min_raise);
                 Game::enemy_turn = false;
                 waited = false;
                 play_init(); return;
@@ -386,7 +389,7 @@ inline void play_handler() {
                 if (mouse_click()) { //bigger raise 
                     Game::raise += 100;
                     if (Game::raise > Gracz::graczList[0].get_credits()) {
-                        Game::raise = Game::minimal_raise;
+                        Game::raise = fin_min_raise;//Game::minimal_raise;
                     }
                     play_init(); return;
                 }
@@ -394,9 +397,12 @@ inline void play_handler() {
             if (StaticObject::collisionList.at(2).pointed_by_mouse()) {
                 if (mouse_click()) {//smaller raise
                     Game::raise -= 100;
-                    if (Game::raise < Game::minimal_raise) {
+                    if (Game::raise < fin_min_raise) {
                         Game::raise = Gracz::graczList[0].get_credits();
                     }
+                   /* if (Game::raise < Game::minimal_raise) {
+                        Game::raise = Gracz::graczList[0].get_credits();
+                    }*/
                     play_init(); return;
                 }
             }
@@ -424,8 +430,8 @@ inline void play_init() {
     if (!Game::game_started) {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {
-             Gracz::graczList[0].add_credits(Game::starting_credits - 3800);//testowo te -3800
-             Gracz::graczList[1].add_credits(Game::starting_credits);
+             Gracz::graczList[0].add_credits(Game::starting_credits );//testowo te -3800
+             Gracz::graczList[1].add_credits(Game::starting_credits -4800);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
             Game::first_round = false;
@@ -443,43 +449,67 @@ inline void play_init() {
         Game::raise = Game::minimal_raise;
         Game::checked_cards = 0;
         Game::game_started = true;
-       //Gracz::graczList[0].calculate_power();//TESTOWO USUNAAAAAAAC!!!
     }
     else {
-        Game::won_prize = 0;
+        Game::won_prize = 0;       
     }
-    //NO CREDITS CONDITION
-    if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-        Game::checked_cards = 4;
-        Gracz::graczList[0].checks = false;
-        Gracz::graczList[1].checks = false;
+    //init fin_min_raise
+    if (!Game::enemy_turn) {//player raises
+        fin_min_raise = Gracz::graczList[1].gave_to_pool - Gracz::graczList[0].gave_to_pool;
+        if (fin_min_raise < 0) { fin_min_raise = 0; }
+        fin_min_raise += Game::minimal_raise;
+
+        if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
+        if (Game::raise > Gracz::graczList[0].get_credits()) { Gracz::graczList[0].allin = true; Game::raise = Gracz::graczList[0].get_credits(); }
     }
-    else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
-        //UWAGA uwzglednij sytuacje gdy robimy all in!
+    else {//enemy raises
+        fin_min_raise = Gracz::graczList[0].gave_to_pool - Gracz::graczList[1].gave_to_pool;
+        if (fin_min_raise < 0) { fin_min_raise = 0; }
+        fin_min_raise += Game::minimal_raise;
+
+        if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
+        if (Game::raise > Gracz::graczList[1].get_credits()) { Gracz::graczList[1].allin = true; Game::raise = Gracz::graczList[1].get_credits(); }
+    }
+    
+    //FOLDS?
+    if (Gracz::graczList[0].folds) { Game::end_round(1); Gracz::graczList[0].folds = false; }
+    else if (Gracz::graczList[1].folds) { Game::end_round(0);Gracz::graczList[1].folds = false; }
+    else {
+        //NO CREDITS CONDITION
+        
+        if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
+            Game::checked_cards = 4;
+            Gracz::graczList[0].checks = false;
+            Gracz::graczList[1].checks = false;
+        }
+        else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
+            //UWAGA uwzglednij sytuacje gdy robimy all in!
             Game::checked_cards++;
             Gracz::graczList[0].checks = false;
             Gracz::graczList[1].checks = false;
-    }
+        }
 
-    if (Game::checked_cards == 4) {
-        //wybor wygrywajacego
-        Gracz::graczList[0].calculate_power();
-        Gracz::graczList[1].calculate_power();
-        int power0 = Gracz::graczList[0].get_power();
-        int power1 = Gracz::graczList[1].get_power();
-        int sub_power0 = Gracz::graczList[0].get_sub_power();
-        int sub_power1 = Gracz::graczList[1].get_sub_power();
-        if ((power0 > power1) || (power0 == power1 && sub_power0 > sub_power1)) {
-            Game::end_round(0);
+        if (Game::checked_cards == 4) {
+            //wybor wygrywajacego
+            Gracz::graczList[0].calculate_power();
+            Gracz::graczList[1].calculate_power();
+            int power0 = Gracz::graczList[0].get_power();
+            int power1 = Gracz::graczList[1].get_power();
+            int sub_power0 = Gracz::graczList[0].get_sub_power();
+            int sub_power1 = Gracz::graczList[1].get_sub_power();
+            if ((power0 > power1) || (power0 == power1 && sub_power0 > sub_power1)) {
+                Game::end_round(0);
+            }
+            else if ((power1 > power0) || (power0 == power1 && sub_power1 > sub_power0)) {
+                Game::end_round(1);
+            }
+            else {//remis
+                Game::end_round(2);
+            }
+
         }
-        else if ((power1 > power0) || (power0 == power1 && sub_power1 > sub_power0)) {
-            Game::end_round(1);
-        }
-        else {//remis
-            Game::end_round(2);
-        }
-        
     }
+    
 
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }

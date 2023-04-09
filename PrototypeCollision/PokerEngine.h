@@ -36,6 +36,7 @@ public:
 	static int next_move;
 	bool allin;
 	bool checks;
+	bool folds;
 	int gave_to_pool;
 	std::vector<Karta> reka;
 	static std::vector<Gracz> graczList;
@@ -45,7 +46,7 @@ public:
 	void raise(int);
 	void call(int);
 	void fold(int);
-	void bot_action();
+	void bot_action(int fin_min_raise);
 	void give_to_pool(int);
 	void calculate_power();
 	int get_power(void);

@@ -20,12 +20,14 @@ class Point {
 	static bool isDealer;
 
 	//MCTS core functions
-	void init_point(const std::vector<Karta>& hand_cards, bool _isDealer);
+	
 	void selection(void);
 	void expansion(void);
-	void simulation(void);
+	
 	void update(void);
 public:
+	void init_point(const std::vector<Karta>& hand_cards, bool _isDealer);//do testow
+	void simulation(int bot_credits,int enemy_credits,int _pool);//do testow
 	Point();
 	~Point() = default;
 };

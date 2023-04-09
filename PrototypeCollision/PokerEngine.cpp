@@ -100,11 +100,12 @@ void Gracz::call(int _caller) {
 
 }
 void Gracz::fold(int _folder) {
-	int enemy = 1 - _folder;
+	/*int enemy = 1 - _folder;*/
+	folds = true;
 	if (_folder) { Game::enemy_desc = "Enemy folds."; }
-	Game::end_round(enemy);
+	/*Game::end_round(enemy);*/
 }
-void Gracz::bot_action() {
+void Gracz::bot_action(int fin_min_raise) {
 	//if (Gracz::graczList[0].allin) {//poszedl all-in nie podbijaj stawki
 	//	
 	//	if (gave_to_pool >= Gracz::graczList[0].gave_to_pool) {
@@ -124,12 +125,14 @@ void Gracz::bot_action() {
 	}
 	int pom = (credits / 100) / 2;
 	if (pom == 0) { pom = 1; }
-	int rv = rand() % pom;
+	int rv = (rand() % pom) + 1;
+	
 	switch (next_move) {
 	case 0:
 		break;
 	case 1:
-		raise(rv * 100);
+		if (rv * 100 < fin_min_raise) { raise(fin_min_raise); }
+		else{ raise(rv * 100); }		
 		Game::enemy_desc = "Enemy raised by " + std::to_string(rv*100) + ".";
 		break;
 	case 2:
@@ -159,20 +162,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 	}
 	karty.push_back(reka.at(0));
 	karty.push_back(reka.at(1));
-	enum kolor { wino, czerwo, zoladz, dzwonek } k;//tylko do testow mozna usunac
-	//testowe karty
-	//karty.push_back(Karta(wino, 13));
-	//karty.push_back(Karta(zoladz, 7));
-	//karty.push_back(Karta(zoladz, 13));
-	//karty.push_back(Karta(wino, 12));
-	//karty.push_back(Karta(zoladz, 12));
-
-	//karty.push_back(Karta(dzwonek, 7));
-	//karty.push_back(Karta(zoladz, 10));
-
-	//sorted_reka.push_back(Karta(dzwonek, 7));
-	//sorted_reka.push_back(Karta(zoladz, 10));
-	//int przejrzenia = 0;
 	//zmienna pomocnicza posortowana reka
 	sorted_reka.push_back(reka[0]);
 	sorted_reka.push_back(reka[1]);
@@ -254,11 +243,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 			power = 7; 
 			int rzad = 1;
 			sub_power = 0;
-			/*for (int i = 0; i < 2; i++) {
-				int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
-				sub_power += num * rzad;
-				rzad *= RZAD_NUM;
-			}*/
 			int num = max1_id + 2;
 			sub_power += num * rzad;
 			} 
@@ -299,11 +283,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 				power = 4; 
 				int rzad = 1;
 				sub_power = 0;
-		/*		for (int i = 0; i < 2; i++) {
-					int num = sorted_reka[i].get_numer(); if (num == 1) { num = 14; }
-					sub_power += num * rzad;
-					rzad *= RZAD_NUM;
-				}*/
 				int num = mozliwe[4].get_numer(); if (num == 1) { num = 14; }
 				sub_power += num * rzad;
 			} 
@@ -377,8 +356,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 				najlepsze = mozliwe;
 			}
 			mozliwe.clear();
-			//przejrzenia++;
-			//std::cout << "Przejrzano " << przejrzenia<< "razy " << std::endl;
 		}
 
 	}
@@ -434,12 +411,14 @@ int Game::get_pool() {
 }
 void Game::blinds(int _d) {//przydziel stawki startowe
 	if (_d == 0) {//dealer to gracz otrzymuje small blind
-		Gracz::graczList[0].give_to_pool(200);
+		if (Gracz::graczList[0].get_credits() > 100) { Gracz::graczList[0].give_to_pool(200); }
+		else { Gracz::graczList[0].give_to_pool(100); }
 		Gracz::graczList[1].give_to_pool(100);
 	}
 	else {
 		Gracz::graczList[0].give_to_pool(100);
-		Gracz::graczList[1].give_to_pool(200);
+		if (Gracz::graczList[1].get_credits() > 100) { Gracz::graczList[1].give_to_pool(200); }
+		else { Gracz::graczList[1].give_to_pool(100); }
 	}
 }
 void Game::end_round(int _winner) {
