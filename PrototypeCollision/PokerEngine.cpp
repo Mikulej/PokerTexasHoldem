@@ -100,10 +100,8 @@ void Gracz::call(int _caller) {
 
 }
 void Gracz::fold(int _folder) {
-	/*int enemy = 1 - _folder;*/
 	folds = true;
 	if (_folder) { Game::enemy_desc = "Enemy folds."; }
-	/*Game::end_round(enemy);*/
 }
 void Gracz::bot_action(int fin_min_raise) {
 	//if (Gracz::graczList[0].allin) {//poszedl all-in nie podbijaj stawki
@@ -437,9 +435,7 @@ void Game::end_round(int _winner) {
 	clear_pool();
 	game_started = false;
 	whowins = _winner;
-	//Game::enemy_desc = "New cards dealt.";
 	if (Gracz::graczList[enemy].get_credits() == 0) {//bankrut - koniec gry
-		//end_game(_winner);
 		ending_game = _winner;
 	}
 }
@@ -451,8 +447,7 @@ void Game::end_game(int _winner) {
 	Gracz::graczList.clear();
 	Gracz::graczList.push_back(Gracz());
 	Gracz::graczList.push_back(Gracz());
-	if (_winner == 0) { std::cout << "Wygrales!" << std::endl; }
-	else { std::cout << "Przegrales!" << std::endl; }
-	//game_state = main_menu
+	//if (_winner == 0) { std::cout << "Wygrales!" << std::endl; }
+	//else { std::cout << "Przegrales!" << std::endl; }
 }
 

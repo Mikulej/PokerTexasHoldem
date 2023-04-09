@@ -195,6 +195,7 @@ int main()
 
 int mouse_state = 0, mouse_old_state = 0;
 bool waiting = false; bool waited = false;
+bool match_point = false, match_point_click_check = false;
 int fin_min_raise = 0;
 time_t start, now;
 inline bool mouse_click() {
@@ -206,7 +207,6 @@ inline void main_menu_handler() {
     if (!StaticObject::collisionList.empty()) {
         if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
             if (mouse_click()) {
-                std::cout << "Clicked start!" << std::endl;
                 //GRAJ
                 play_init();
                 return;
@@ -359,69 +359,76 @@ inline void play_handler() {
         }
     }
     else { //GRA
-        if (Game::enemy_turn) {//RUCH KOMPUTERA
-            if (waiting) {
-                time(&now);
-                //std::cout << difftime(now, start) << std::endl;
-                if (difftime(now, start) >= WAIT_TIME) { waited = true; waiting = false; }
-                else { return; }
-            }
-            if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
-            else {
-                Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
-               // p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
-                Gracz::graczList[1].bot_action(fin_min_raise);
-                Game::enemy_turn = false;
-                waited = false;
-                play_init(); return;
+        if (match_point_click_check) {
+            if (mouse_click()) { 
+                match_point_click_check = !match_point_click_check;
+           
+                play_init();
+                return;
             }
         }
-        else {//RUCHA GRACZA
-            if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
-                if (mouse_click()) { //raise confirm
-                    Gracz::graczList[0].raise(Game::raise);
-                    Game::enemy_turn = true;
-                    play_init();
-                    return;
+        else {
+            if (Game::enemy_turn) {//RUCH KOMPUTERA
+                if (waiting) {
+                    time(&now);
+                    //std::cout << difftime(now, start) << std::endl;
+                    if (difftime(now, start) >= WAIT_TIME) { waited = true; waiting = false; }
+                    else { return; }
+                }
+                if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
+                else {
+                    Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
+                    // p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
+                    Gracz::graczList[1].bot_action(fin_min_raise);
+                    Game::enemy_turn = false;
+                    waited = false;
+                    play_init(); return;
                 }
             }
-            if (StaticObject::collisionList.at(1).pointed_by_mouse()) {
-                if (mouse_click()) { //bigger raise 
-                    Game::raise += 100;
-                    if (Game::raise > Gracz::graczList[0].get_credits()) {
-                        Game::raise = fin_min_raise;//Game::minimal_raise;
+            else {//RUCHA GRACZA
+                if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
+                    if (mouse_click()) { //raise confirm
+                        Gracz::graczList[0].raise(Game::raise);
+                        Game::enemy_turn = true;
+                        play_init();
+                        return;
                     }
-                    play_init(); return;
                 }
-            }
-            if (StaticObject::collisionList.at(2).pointed_by_mouse()) {
-                if (mouse_click()) {//smaller raise
-                    Game::raise -= 100;
-                    if (Game::raise < fin_min_raise) {
-                        Game::raise = Gracz::graczList[0].get_credits();
+                if (StaticObject::collisionList.at(1).pointed_by_mouse()) {
+                    if (mouse_click()) { //bigger raise 
+                        Game::raise += 100;
+                        if (Game::raise > Gracz::graczList[0].get_credits()) {
+                            Game::raise = fin_min_raise;
+                        }
+                        play_init(); return;
                     }
-                   /* if (Game::raise < Game::minimal_raise) {
-                        Game::raise = Gracz::graczList[0].get_credits();
-                    }*/
-                    play_init(); return;
                 }
-            }
-            if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
-                if (mouse_click()) { //call 
-                    Gracz::graczList[0].call(0);
-                    Game::enemy_turn = true;
-                    play_init(); return;
+                if (StaticObject::collisionList.at(2).pointed_by_mouse()) {
+                    if (mouse_click()) {//smaller raise
+                        Game::raise -= 100;
+                        if (Game::raise < fin_min_raise) {
+                            Game::raise = Gracz::graczList[0].get_credits();
+                        }
+                        play_init(); return;
+                    }
                 }
-            }
-            if (StaticObject::collisionList.at(4).pointed_by_mouse()) {
-                if (mouse_click()) {//fold    
-                    Gracz::graczList[0].fold(0);
-                    play_init(); return;
+                if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
+                    if (mouse_click()) { //call 
+                        Gracz::graczList[0].call(0);
+                        Game::enemy_turn = true;
+                        play_init(); return;
+                    }
+                }
+                if (StaticObject::collisionList.at(4).pointed_by_mouse()) {
+                    if (mouse_click()) {//fold    
+                        Gracz::graczList[0].fold(0);
+                        play_init(); return;
+                    }
                 }
             }
         }
+       
     }
-    
 }
 inline void play_init() {
     StaticObject::DelAll(); Text::DelAll();
@@ -431,7 +438,7 @@ inline void play_init() {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {
              Gracz::graczList[0].add_credits(Game::starting_credits );//testowo te -3800
-             Gracz::graczList[1].add_credits(Game::starting_credits -4800);
+             Gracz::graczList[1].add_credits(Game::starting_credits - 4800);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
             Game::first_round = false;
@@ -470,20 +477,24 @@ inline void play_init() {
         if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
         if (Game::raise > Gracz::graczList[1].get_credits()) { Gracz::graczList[1].allin = true; Game::raise = Gracz::graczList[1].get_credits(); }
     }
+
+    if (match_point && match_point_click_check == false) {//sprawdz czy kliknieto na potwierdzenie
+        Game::checked_cards = 4;
+    }
     
-    //FOLDS?
+    //FOLDS
     if (Gracz::graczList[0].folds) { Game::end_round(1); Gracz::graczList[0].folds = false; }
-    else if (Gracz::graczList[1].folds) { Game::end_round(0);Gracz::graczList[1].folds = false; }
+    else if (Gracz::graczList[1].folds) { Game::end_round(0); Gracz::graczList[1].folds = false; }
     else {
         //NO CREDITS CONDITION
-        
+
         if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-            Game::checked_cards = 4;
+            match_point = true; match_point_click_check = true;//te dwie flagi sa gaszone gdy po kliknieciu sterowanie dojdzie do wyboru wygrywajacego
+           // std::cout << "Match point!" << std::endl;
             Gracz::graczList[0].checks = false;
             Gracz::graczList[1].checks = false;
         }
         else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
-            //UWAGA uwzglednij sytuacje gdy robimy all in!
             Game::checked_cards++;
             Gracz::graczList[0].checks = false;
             Gracz::graczList[1].checks = false;
@@ -506,10 +517,9 @@ inline void play_init() {
             else {//remis
                 Game::end_round(2);
             }
-
+            match_point = false; match_point_click_check = false;
         }
     }
-    
 
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -525,7 +535,7 @@ inline void play_init() {
     //TEXT & UI
     switch (Game::whowins) {
     case 0:
-        if (ending_game == 1) {
+        if (ending_game == 0) {
             Text::AddRaw("Victory", 0.75f, 0.1f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f));
             Text::AddRaw("(Click to return to menu)", 0.775f, 0.0f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
@@ -549,6 +559,10 @@ inline void play_init() {
     case 2:
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
         Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+        if (match_point) {
+            Text::AddRaw("Match point", 0.775f, -0.15f, 0.0009f, 0.0009f, glm::vec3(1.0f, 0.647f, 0.0f));
+            Text::AddRaw("(Click to reveal cards)", 0.775f, -0.25f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+        }
         break;
     case 3:
         Text::AddRaw("Draw!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.8f, 0.8f, 0.8f));
