@@ -361,8 +361,7 @@ inline void play_handler() {
     else { //GRA
         if (match_point_click_check) {
             if (mouse_click()) { 
-                match_point_click_check = !match_point_click_check;
-           
+                match_point_click_check = !match_point_click_check;       
                 play_init();
                 return;
             }
@@ -378,7 +377,7 @@ inline void play_handler() {
                 if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
                 else {
                     Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
-                    //p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
+                    p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool(),1);
                     Gracz::graczList[1].bot_action(fin_min_raise);
                     Game::enemy_turn = false;
                     waited = false;
@@ -437,8 +436,8 @@ inline void play_init() {
     if (!Game::game_started) {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {
-             Gracz::graczList[0].add_credits(Game::starting_credits );//testowo te -3800
-             Gracz::graczList[1].add_credits(Game::starting_credits - 4800);
+             Gracz::graczList[0].add_credits(Game::starting_credits);
+             Gracz::graczList[1].add_credits(Game::starting_credits);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
             Game::first_round = false;
@@ -507,7 +506,6 @@ inline void play_init() {
                 Gracz::graczList[0].checks = false;
                 Gracz::graczList[1].checks = false;
             }
-
             if (Game::checked_cards == 4) {
                 //wybor wygrywajacego
                 Gracz::graczList[0].calculate_power();
@@ -529,10 +527,7 @@ inline void play_init() {
             }
         }
     }
-    
-
-    
-
+   
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
     else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -587,8 +582,7 @@ inline void play_init() {
         Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         break;
     }
-
-    
+   
     Text::AddRaw("Your credits:", 0.2f, -0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
     Text::AddRaw(std::to_string(Gracz::graczList[0].get_credits()) + "(" + std::to_string(Gracz::graczList[0].gave_to_pool) + ")", 0.5f, -0.53f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     Text::AddRaw("Enemy credits:", 0.2f, 0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
@@ -622,8 +616,7 @@ inline void play_init() {
     else {
         StaticObject::AddItem(10, -0.5f, 0.7f);
         StaticObject::AddItem(10, -0.8f, 0.7f);
-    }
-   
+    } 
 }
 inline void exit_program_init() {
     game_state = exit_program;
@@ -632,11 +625,8 @@ void processInput(GLFWwindow* window)
 {
     //MOUSE 
     glfwGetCursorPos(window, &mx, &my);
-    //std::cout << "Before X: " << mx << std::endl;
     mx = (mx / (double)SCR_WIDTH * 2) - 1;
     my = 1 - my / (double)SCR_HEIGHT * 2;
-    //std::cout << "X: " << mx << " Y: " << my << std::endl;
-    //std::cout << "After X: "<< (double)(mx + 1) * (double)SCR_WIDTH / (double)2 << std::endl;
     mouse_state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
     //SCREEN STATE HANDLER
     switch (game_state) {

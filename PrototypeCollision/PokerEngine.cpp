@@ -355,7 +355,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 			}
 			mozliwe.clear();
 		}
-
 	}
 	Gracz::power = highest_power;
 	Gracz::sub_power = highest_sub_power;
