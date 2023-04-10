@@ -384,6 +384,7 @@ bool Game::enemy_turn = false;
 int Game::checked_cards = 0;
 int Game::whowins = 2; //0=player 1=enemy 2=none 3=draw
 int Game::won_prize = 0;
+bool Game::missing_blind = false;
 std::string Game::enemy_desc = "New cards dealt.";
 std::vector<Karta> Game::talia;
 std::vector<Karta> Game::stol;
@@ -408,15 +409,17 @@ int Game::get_pool() {
 	return pool;
 }
 void Game::blinds(int _d) {//przydziel stawki startowe
-	if (_d == 0) {//dealer to gracz otrzymuje small blind
-		if (Gracz::graczList[0].get_credits() > 100) { Gracz::graczList[0].give_to_pool(200); }
-		else { Gracz::graczList[0].give_to_pool(100); }
-		Gracz::graczList[1].give_to_pool(100);
+	if (_d == 0) {//dealer to gracz otrzymuje small blind		
+		if(Gracz::graczList[1].get_credits() >= 100){ Gracz::graczList[1].give_to_pool(100); }
+		else { missing_blind = true; }
+		if (Gracz::graczList[0].get_credits() >= 200) { Gracz::graczList[0].give_to_pool(200); }
+		else { missing_blind = true; }		
 	}
-	else {
-		Gracz::graczList[0].give_to_pool(100);
-		if (Gracz::graczList[1].get_credits() > 100) { Gracz::graczList[1].give_to_pool(200); }
-		else { Gracz::graczList[1].give_to_pool(100); }
+	else {		
+		if(Gracz::graczList[0].get_credits() >= 100){ Gracz::graczList[0].give_to_pool(100); }
+		else{ missing_blind = true; }
+		if (Gracz::graczList[1].get_credits() >= 200) { Gracz::graczList[1].give_to_pool(200); }
+		else { missing_blind = true; }
 	}
 }
 void Game::end_round(int _winner) {
@@ -435,7 +438,7 @@ void Game::end_round(int _winner) {
 	clear_pool();
 	game_started = false;
 	whowins = _winner;
-	if (Gracz::graczList[enemy].get_credits() == 0) {//bankrut - koniec gry
+	if (missing_blind) {//bankrut - koniec gry
 		ending_game = _winner;
 	}
 }

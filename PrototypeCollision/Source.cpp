@@ -378,7 +378,7 @@ inline void play_handler() {
                 if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
                 else {
                     Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
-                    // p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
+                    //p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool());
                     Gracz::graczList[1].bot_action(fin_min_raise);
                     Game::enemy_turn = false;
                     waited = false;
@@ -452,6 +452,7 @@ inline void play_init() {
         Gracz::graczList[0].wez_karty_z_talii(); 
         Gracz::graczList[1].wez_karty_z_talii(); 
         Game::stworz_stol();       
+        Game::missing_blind = false;
         Game::blinds(Game::whos_dealer);
         Game::raise = Game::minimal_raise;
         Game::checked_cards = 0;
@@ -460,7 +461,9 @@ inline void play_init() {
     else {
         Game::won_prize = 0;       
     }
-    //init fin_min_raise
+    
+
+    //init fin_min_raise - ustal najmniejsza wartosc jaka mozna podbic aktualna stawke
     if (!Game::enemy_turn) {//player raises
         fin_min_raise = Gracz::graczList[1].gave_to_pool - Gracz::graczList[0].gave_to_pool;
         if (fin_min_raise < 0) { fin_min_raise = 0; }
@@ -481,45 +484,54 @@ inline void play_init() {
     if (match_point && match_point_click_check == false) {//sprawdz czy kliknieto na potwierdzenie
         Game::checked_cards = 4;
     }
-    
-    //FOLDS
-    if (Gracz::graczList[0].folds) { Game::end_round(1); Gracz::graczList[0].folds = false; }
-    else if (Gracz::graczList[1].folds) { Game::end_round(0); Gracz::graczList[1].folds = false; }
+
+    if (Game::missing_blind) {//czy kazdy mial wystarczajaco pieniedzy na blind? - jesli tak przerwij i zakoncz gre
+        if (Gracz::graczList[0].get_credits() < Gracz::graczList[1].get_credits()) { Game::end_round(1); }
+        else { Game::end_round(0); }
+    }
     else {
-        //NO CREDITS CONDITION
+        //FOLDS
+        if (Gracz::graczList[0].folds) { Game::end_round(1); Gracz::graczList[0].folds = false; }
+        else if (Gracz::graczList[1].folds) { Game::end_round(0); Gracz::graczList[1].folds = false; }
+        else {
+            //NO CREDITS CONDITION
 
-        if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-            match_point = true; match_point_click_check = true;//te dwie flagi sa gaszone gdy po kliknieciu sterowanie dojdzie do wyboru wygrywajacego
-           // std::cout << "Match point!" << std::endl;
-            Gracz::graczList[0].checks = false;
-            Gracz::graczList[1].checks = false;
-        }
-        else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
-            Game::checked_cards++;
-            Gracz::graczList[0].checks = false;
-            Gracz::graczList[1].checks = false;
-        }
+            if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
+                match_point = true; match_point_click_check = true;//te dwie flagi sa gaszone gdy po kliknieciu sterowanie dojdzie do wyboru wygrywajacego
+                // std::cout << "Match point!" << std::endl;
+                Gracz::graczList[0].checks = false;
+                Gracz::graczList[1].checks = false;
+            }
+            else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
+                Game::checked_cards++;
+                Gracz::graczList[0].checks = false;
+                Gracz::graczList[1].checks = false;
+            }
 
-        if (Game::checked_cards == 4) {
-            //wybor wygrywajacego
-            Gracz::graczList[0].calculate_power();
-            Gracz::graczList[1].calculate_power();
-            int power0 = Gracz::graczList[0].get_power();
-            int power1 = Gracz::graczList[1].get_power();
-            int sub_power0 = Gracz::graczList[0].get_sub_power();
-            int sub_power1 = Gracz::graczList[1].get_sub_power();
-            if ((power0 > power1) || (power0 == power1 && sub_power0 > sub_power1)) {
-                Game::end_round(0);
+            if (Game::checked_cards == 4) {
+                //wybor wygrywajacego
+                Gracz::graczList[0].calculate_power();
+                Gracz::graczList[1].calculate_power();
+                int power0 = Gracz::graczList[0].get_power();
+                int power1 = Gracz::graczList[1].get_power();
+                int sub_power0 = Gracz::graczList[0].get_sub_power();
+                int sub_power1 = Gracz::graczList[1].get_sub_power();
+                if ((power0 > power1) || (power0 == power1 && sub_power0 > sub_power1)) {
+                    Game::end_round(0);
+                }
+                else if ((power1 > power0) || (power0 == power1 && sub_power1 > sub_power0)) {
+                    Game::end_round(1);
+                }
+                else {//remis
+                    Game::end_round(2);
+                }
+                match_point = false; match_point_click_check = false;
             }
-            else if ((power1 > power0) || (power0 == power1 && sub_power1 > sub_power0)) {
-                Game::end_round(1);
-            }
-            else {//remis
-                Game::end_round(2);
-            }
-            match_point = false; match_point_click_check = false;
         }
     }
+    
+
+    
 
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -530,8 +542,14 @@ inline void play_init() {
     else { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Call", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
     StaticObject::AddItem(2, 0.8f, -0.7f);  Text::Add("Fold", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
     //PLAYERS HAND
-    StaticObject::AddItem(11, -0.5f, -0.7f, Gracz::graczList[0].reka[0].get_numer(), Gracz::graczList[0].reka[0].get_kolor());//5
-    StaticObject::AddItem(11, -0.8f, -0.7f, Gracz::graczList[0].reka[1].get_numer(), Gracz::graczList[0].reka[1].get_kolor());//6
+    if (ending_game != 2) {//zaslon karty jesli jest koniec gry
+        StaticObject::AddItem(10, -0.5f, -0.7f);
+        StaticObject::AddItem(10, -0.8f, -0.7f);
+    }
+    else {
+        StaticObject::AddItem(11, -0.5f, -0.7f, Gracz::graczList[0].reka[0].get_numer(), Gracz::graczList[0].reka[0].get_kolor());//5
+        StaticObject::AddItem(11, -0.8f, -0.7f, Gracz::graczList[0].reka[1].get_numer(), Gracz::graczList[0].reka[1].get_kolor());//6 
+    }  
     //TEXT & UI
     switch (Game::whowins) {
     case 0:
@@ -560,7 +578,7 @@ inline void play_init() {
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
         Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
         if (match_point) {
-            Text::AddRaw("Match point", 0.775f, -0.15f, 0.0009f, 0.0009f, glm::vec3(1.0f, 0.647f, 0.0f));
+            Text::AddRaw("Forced check", 0.775f, -0.15f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.647f, 0.0f));
             Text::AddRaw("(Click to reveal cards)", 0.775f, -0.25f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
         break;

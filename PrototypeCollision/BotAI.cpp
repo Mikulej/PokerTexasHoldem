@@ -54,18 +54,30 @@ void Point::simulation(int bot_credits, int enemy_credits, int _pool) {
 		//if (players[0].get_credits() != 0 || players[1].get_credits() != 0) { checked_cards=4; break; }//sprawdz czy ktos zbankrutowal przez danie blinda - napewno?
 		//perform random action
 		int option = rand() % 3;//moze ustawic jakies lepsze wagi? ze np fold ma 65% szans
-		int raise_amount; int h; int align_amount;
+		int raise_amount; int h_max; int h_min; int align_amount; int fin_min_raise = 0; int h;
 		switch (option) {
 		case 0://raise
 			//if (raise_amount < Game::minimal_raise) {} !!! UWZGLEDNIJ GAME::MINIMAL_RAISE
-			h = (*player).get_credits() / 100;
+			//player raises
+			fin_min_raise = (*enemy).gave_to_pool - (*player).gave_to_pool;
+			if (fin_min_raise < 0) { fin_min_raise = 0; }
+			fin_min_raise += Game::minimal_raise;
+
+			h_min = fin_min_raise;
+			h_max = (*player).get_credits();
+			//if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
+			//if (Game::raise > Gracz::graczList[0].get_credits()) { Gracz::graczList[0].allin = true; Game::raise = Gracz::graczList[0].get_credits(); }
+			h = h_max - h_min;
+			if (h == 0) { raise_amount = h_max; }
+			else{ raise_amount = (rand() % h) + h_min; }			
+			/*h = (*player).get_credits() / 100;
 			if (h == 0) {
 				(*player).allin = true;
 				raise_amount = (*player).get_credits();
 			}
 			else {
 				raise_amount = ((rand() % h)+1) * 100;
-			}
+			}*/
 			
 			
 			(*player).sim_give_to_pool(raise_amount,pool);
