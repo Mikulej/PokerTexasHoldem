@@ -376,8 +376,7 @@ inline void play_handler() {
                 }
                 if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
                 else {
-                    Point p; p.init_point(Gracz::graczList[1].reka, Game::whos_dealer);
-                    p.simulation(Gracz::graczList[1].get_credits(), Gracz::graczList[0].get_credits(),Game::get_pool(),1);
+                    Point p(Gracz::graczList[1].reka, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
                     Gracz::graczList[1].bot_action(fin_min_raise);
                     Game::enemy_turn = false;
                     waited = false;

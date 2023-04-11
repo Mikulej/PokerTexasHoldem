@@ -51,6 +51,9 @@ Karta::Karta(kolor _k, numer _n) : k(_k), n(_n) {
 Karta::Karta(int _k, int _n) :k((kolor)_k),n((numer)_n){
 
 }
+bool Karta::operator==(const Karta& right) {
+	return (k == right.k && n == right.n);
+}
 void Karta::KartaInit() {
 	stworz_komplet(komplet);
 }

@@ -16,6 +16,7 @@ class Karta {
 	Karta(kolor, numer);
 	Karta(int, int);
 public:
+	bool operator==(const Karta& right);
 	static void stworz_komplet(std::vector<Karta>&);
 	int get_kolor() const;
 	int get_numer() const;
