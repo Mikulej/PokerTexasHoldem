@@ -11,6 +11,13 @@ struct SimData {
 	int pool; int checked_cards;
 	bool enemy_checks;
 };
+class Point;
+struct SearchData {
+	double val;
+	Point* ptr;
+};
+
+SearchData search_uct(Point* head, Point* root, SearchData max);
 /// <summary>
 ///    O <- Point
 ///  / | \
@@ -31,6 +38,8 @@ class Point {
 	void expansion(void);//tworzy 3 node'y reprezentujace ruchy ktore mozna wykonac
 	
 	void update(bool _won);
+	inline double calc_uct(Point* head);
+	friend SearchData search_uct(Point* head, Point* root, SearchData max);
 public:
 	bool simulation(void);// zwraca czy bool czy bot wygral - takze uaktualnie SimData sd do stanu PO wykonaniu zaplanowego z gory ruchu
 	Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_credits, int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks, int _pool, int _checked_cards);

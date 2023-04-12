@@ -1,6 +1,6 @@
 #include "BotAI.h"
 std::vector<Karta> Point::hand_cards;
-#define SIM_NUM 30
+#define SIM_NUM 300
 Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_credits,int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks,  int _pool,int _checked_cards) {//head constructor
 	hand_cards = _hand_cards;
 	sd.isDealer = _isDealer;
@@ -27,34 +27,39 @@ Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_cre
 		node_current = selection();//wybierz nowe rozgalezienie do obslugi
 		
 	}
+	//wybierz najlepszy ruch (ten z najwieksza iloscia symulacji)
+	int max_sim = node_raise->simulations; 
+	if (node_call->simulations > max_sim) { max_sim = node_call->simulations; }
+	if (node_fold->simulations > max_sim) { max_sim = node_fold->simulations; }
 	int a = 2;
+	//cos jest nie tak mimo ze ma malo pieniedzy to dalej chce podbijac - mozliwym powodem moze byc fakt akcja podbijania obejmuje kazda stawke (jest losowana)
 }
 Point::Point(Point* _prev,SimData _sd):prev(_prev),sd(_sd) {//node constructor
 
 }
-Point* Point::selection(void) {
-	//poniewaz w konstrzuktorze sa robione symulacje simulations bedzie != 0 dla glowy
-	//expand current node other?
-	//double explore_val = sqrt(2*log(node_raise->simulations)/)
-	//if (1) {//go to other
-
-	//}
-	//else {//expand current
-	//
-	//}
-	
-	//wybierz najbardziej obiecujacy node
-	Point* node_parent = this,*node_explore=nullptr;
-	while (node_parent->node_raise != nullptr) {//dojdz do konca drzewa (gdzie nie ma kolejnych rozgalezien)
-		double best_option = node_parent->node_raise->wins / (double)node_parent->node_raise->simulations; node_explore = node_parent->node_raise;
-		double temp = node_parent->node_call->wins / (double)node_parent->node_call->simulations;
-		if (best_option < temp) { best_option = temp; node_explore = node_parent->node_call; }
-		temp = node_parent->node_fold->wins / (double)node_parent->node_fold->simulations;
-		if (best_option < temp) { best_option = temp; node_explore = node_parent->node_fold; }
-		node_parent = node_explore;
+#define PARAM_C sqrt(2)
+inline double Point::calc_uct(Point* root) {//nie jestem pewien -sprawdz wikipedie
+	//return (double)((double)wins / (double)simulations) + PARAM_C * sqrt(log(root->simulations) / (double)simulations);
+	 return (double)((double)wins / (double)simulations) + PARAM_C * sqrt(log(this->prev->simulations) / (double)simulations);
+}
+SearchData search_uct(Point *head,Point * root,SearchData _max) {
+	SearchData temp;
+	SearchData max = _max;
+	if (head->node_raise != nullptr) {
+		temp = search_uct(head->node_raise, root,max);  if (max.val < temp.val) { max = temp; }
+		temp = search_uct(head->node_call, root,max); if (max.val < temp.val) { max = temp; }
+		temp = search_uct(head->node_fold, root,max); if (max.val < temp.val) { max = temp; }
+		return max;
 	}
-	
-	return node_explore;
+	else {
+		temp.val = head->calc_uct(root);
+		temp.ptr = head;
+		return temp;
+	}
+}
+Point* Point::selection(void) {
+	SearchData sd; sd.ptr = node_raise; sd.val = node_raise->calc_uct(this);
+	return search_uct(this, this,sd).ptr;
 }
 bool Point::simulation(void) {
 	int first_move = sd.next_move;

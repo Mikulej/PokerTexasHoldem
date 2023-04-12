@@ -436,7 +436,7 @@ inline void play_init() {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {
              Gracz::graczList[0].add_credits(Game::starting_credits);
-             Gracz::graczList[1].add_credits(Game::starting_credits);
+             Gracz::graczList[1].add_credits(Game::starting_credits - 4800);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
             Game::first_round = false;
