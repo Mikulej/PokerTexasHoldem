@@ -106,46 +106,20 @@ void Gracz::fold(int _folder) {
 	folds = true;
 	if (_folder) { Game::enemy_desc = "Enemy folds."; }
 }
-void Gracz::bot_action(int fin_min_raise) {
-	//if (Gracz::graczList[0].allin) {//poszedl all-in nie podbijaj stawki
-	//	
-	//	if (gave_to_pool >= Gracz::graczList[0].gave_to_pool) {
-	//		//check
-	//	}
-	//	else {
-	//		//call-wyrownaj stawke
-	//	}
-	//}
-	//else {
-	//	int r = (rand() % 9) + 1;
-	//	raise((r / 2) * 100);
-	//	Game::enemy_desc = "Enemy raised by " + std::to_string((r / 2) * 100) + ".";
-	//}
-	if (next_move == 0) {
-		next_move = (rand() % 3) + 1;
-	}
-	int pom = (credits / 100) / 2;
-	if (pom == 0) { pom = 1; }
-	int rv = (rand() % pom) + 1;
-	
-	switch (next_move) {
+void Gracz::bot_action(int next_move,int raise_by) {
+	switch (next_move)
+	{
 	case 0:
+		raise(raise_by);
+		Game::enemy_desc = "Enemy raised by " + std::to_string(raise_by) + ".";
 		break;
 	case 1:
-		if (rv * 100 < fin_min_raise) { raise(fin_min_raise); }
-		else{ raise(rv * 100); }		
-		Game::enemy_desc = "Enemy raised by " + std::to_string(rv*100) + ".";
+		call(1);
 		break;
 	case 2:
-		call(1);
-		break;	
-	case 3:
 		fold(1);
 		break;
 	}
-
-
-
 }
 
 void Gracz::give_to_pool(int _v) {
@@ -452,7 +426,5 @@ void Game::end_game(int _winner) {
 	Gracz::graczList.clear();
 	Gracz::graczList.push_back(Gracz());
 	Gracz::graczList.push_back(Gracz());
-	//if (_winner == 0) { std::cout << "Wygrales!" << std::endl; }
-	//else { std::cout << "Przegrales!" << std::endl; }
 }
 

@@ -1,6 +1,6 @@
 #include "BotAI.h"
 std::vector<Karta> Point::hand_cards;
-#define SIM_NUM 300
+#define SIM_NUM 5000
 Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_credits,int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks,  int _pool,int _checked_cards) {//head constructor
 	hand_cards = _hand_cards;
 	sd.isDealer = _isDealer;
@@ -15,7 +15,7 @@ Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_cre
 
 	Point* node_current = this;//zacznij od punktu startowego(glowy)
 	while (simulations < SIM_NUM) {
-		std::cout << simulations << std::endl;
+		//std::cout << simulations << std::endl;
 		node_current->expansion();//dodaj 3 rozgalezienia
 		bool won_sim; //wykonaj ich symulacje
 		won_sim = node_current->node_raise->simulation();
@@ -28,38 +28,34 @@ Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_cre
 		
 	}
 	//wybierz najlepszy ruch (ten z najwieksza iloscia symulacji)
-	int max_sim = node_raise->simulations; 
-	if (node_call->simulations > max_sim) { max_sim = node_call->simulations; }
-	if (node_fold->simulations > max_sim) { max_sim = node_fold->simulations; }
-	int a = 2;
-	//cos jest nie tak mimo ze ma malo pieniedzy to dalej chce podbijac - mozliwym powodem moze byc fakt akcja podbijania obejmuje kazda stawke (jest losowana)
+	//zaktualizuj SimData dla korzenia bedzie to ruch ktory jako nastepny wykona bot
+	int max_sim = node_raise->simulations; sd = node_raise->sd;
+	if (node_call->simulations > max_sim) { max_sim = node_call->simulations; sd = node_call->sd;}
+	if (node_fold->simulations > max_sim) { max_sim = node_fold->simulations; sd = node_fold->sd; }
 }
 Point::Point(Point* _prev,SimData _sd):prev(_prev),sd(_sd) {//node constructor
 
 }
+Point::~Point() {
+	delete(node_raise);
+	delete(node_call);
+	delete(node_fold);
+}
 #define PARAM_C sqrt(2)
-inline double Point::calc_uct(Point* root) {//nie jestem pewien -sprawdz wikipedie
-	//return (double)((double)wins / (double)simulations) + PARAM_C * sqrt(log(root->simulations) / (double)simulations);
-	 return (double)((double)wins / (double)simulations) + PARAM_C * sqrt(log(this->prev->simulations) / (double)simulations);
+inline double Point::calc_uct(Point* root) {
+	 return (double)((double)wins / (double)simulations) + PARAM_C * sqrt(log(prev->simulations) / (double)simulations);
 }
-SearchData search_uct(Point *head,Point * root,SearchData _max) {
-	SearchData temp;
-	SearchData max = _max;
-	if (head->node_raise != nullptr) {
-		temp = search_uct(head->node_raise, root,max);  if (max.val < temp.val) { max = temp; }
-		temp = search_uct(head->node_call, root,max); if (max.val < temp.val) { max = temp; }
-		temp = search_uct(head->node_fold, root,max); if (max.val < temp.val) { max = temp; }
-		return max;
+Point* Point::selection(void) {	
+	//sprawdz najlepsze z 3 dostepnych i wejdz glebiej
+	Point* node_parent = this, *node_explore = nullptr;
+	double max, temp;
+	while (node_parent->node_raise != nullptr) {
+		max = node_parent->node_raise->calc_uct(this); node_explore = node_parent->node_raise;
+		temp = node_parent->node_call->calc_uct(this); if (temp > max) { max = temp; node_explore = node_parent->node_call;}
+		temp = node_parent->node_fold->calc_uct(this); if (temp > max) { max = temp; node_explore = node_parent->node_fold; }
+		node_parent = node_explore;
 	}
-	else {
-		temp.val = head->calc_uct(root);
-		temp.ptr = head;
-		return temp;
-	}
-}
-Point* Point::selection(void) {
-	SearchData sd; sd.ptr = node_raise; sd.val = node_raise->calc_uct(this);
-	return search_uct(this, this,sd).ptr;
+	return node_parent;
 }
 bool Point::simulation(void) {
 	int first_move = sd.next_move;
@@ -271,4 +267,10 @@ void Point::update(bool _won) {//zrob update do punktu startowego(glowy)
 			temp = temp->prev;
 		}
 	}	
+}
+int Point::get_next_move(void) {
+	return sd.next_move;
+}
+int Point::get_raise_by(void) {
+	return sd.raise_by;
 }

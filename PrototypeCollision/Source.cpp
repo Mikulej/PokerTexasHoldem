@@ -140,7 +140,6 @@ int main()
     stbi_image_free(data);
     //////////////////////////////////////////////
     // Enable blending
-    //glEnable(GL_CULL_FACE);//do tekstu?~!!!!!!!!!!!
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     // TEXT
@@ -377,7 +376,7 @@ inline void play_handler() {
                 if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
                 else {
                     Point p(Gracz::graczList[1].reka, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
-                    Gracz::graczList[1].bot_action(fin_min_raise);
+                    Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
                     Game::enemy_turn = false;
                     waited = false;
                     play_init(); return;
@@ -436,7 +435,7 @@ inline void play_init() {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {
              Gracz::graczList[0].add_credits(Game::starting_credits);
-             Gracz::graczList[1].add_credits(Game::starting_credits - 4800);
+             Gracz::graczList[1].add_credits(Game::starting_credits);
              if (Game::dealer_option == 2) { Game::whos_dealer = rand() % 2; }
              else { Game::whos_dealer = Game::dealer_option;  Game::enemy_turn = Game::whos_dealer; }
             Game::first_round = false;
@@ -460,7 +459,6 @@ inline void play_init() {
         Game::won_prize = 0;       
     }
     
-
     //init fin_min_raise - ustal najmniejsza wartosc jaka mozna podbic aktualna stawke
     if (!Game::enemy_turn) {//player raises
         fin_min_raise = Gracz::graczList[1].gave_to_pool - Gracz::graczList[0].gave_to_pool;
@@ -646,18 +644,6 @@ void processInput(GLFWwindow* window)
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
         SCR_WIDTH = 800; SCR_HEIGHT = 450;
         glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
-    }
-    if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS) {
-        Gracz::next_move = 0;//random
-    }
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS) {
-        Gracz::next_move = 1;//raise
-    }
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS) {
-        Gracz::next_move = 2;//call
-    }
-    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS) {
-        Gracz::next_move = 3;//fold
     }
     //OLD STATES
     mouse_old_state = mouse_state;

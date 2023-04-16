@@ -47,7 +47,7 @@ public:
 	void raise(int);
 	void call(int);
 	void fold(int);
-	void bot_action(int fin_min_raise);
+	void bot_action(int next_move, int raise_by);
 	void give_to_pool(int);
 	void calculate_power();
 	int get_power(void);
