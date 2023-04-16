@@ -1,8 +1,10 @@
 #include "BotAI.h"
 std::vector<Karta> Point::hand_cards;
+std::vector<Karta> Point::desk_cards;
 #define SIM_NUM 5000
-Point::Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_credits,int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks,  int _pool,int _checked_cards) {//head constructor
+Point::Point(const std::vector<Karta>& _hand_cards, const std::vector<Karta>& _desk_cards, bool _isDealer, int _bot_credits,int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks,  int _pool,int _checked_cards) {//head constructor
 	hand_cards = _hand_cards;
+	desk_cards = _desk_cards;
 	sd.isDealer = _isDealer;
 	sd.bot_credits = _bot_credits;
 	sd.bot_gave = _bot_gave;
@@ -63,7 +65,6 @@ bool Point::simulation(void) {
 	players.push_back(Gracz()); players[0].add_credits(sd.enemy_credits); players[0].gave_to_pool = sd.enemy_gave; players[0].checks = sd.enemy_checks;
 	players.push_back(Gracz()); players[1].add_credits(sd.bot_credits); players[1].gave_to_pool = sd.bot_gave; 
 	std::vector<Karta> all_cards; Karta::stworz_komplet(all_cards);
-	//std::cout << "Przed: " << all_cards.size() << std::endl;
 	//wyjmij karty z all_cards ktore ma bot
 	for (auto start = all_cards.begin(), finish = all_cards.end(); start != finish; ) {
 		if ((*start) == hand_cards[0] || (*start) == hand_cards[1]) {
@@ -73,10 +74,22 @@ bool Point::simulation(void) {
 			start++;
 		}
 	}
-	//std::cout << "Po: " << all_cards.size() << std::endl;
+	//wyjmij karty z all_cards ktore sa odkryte na stole
+	for (auto start = all_cards.begin(), finish = all_cards.end(); start != finish; ) {
+		bool powtorka = false;
+		for (auto c : desk_cards) {
+			if (c == (*start)) { powtorka = true; }
+		}
+		if (powtorka) {
+			start = all_cards.erase(start); finish = all_cards.end();
+		}
+		else {
+			start++;
+		}
+	}
 	std::random_shuffle(all_cards.begin(), all_cards.end());
-	std::vector<Karta> hole_cards;//karty na stole
-	for (int i = 0; i < 5; i++) hole_cards.push_back(all_cards.back()); all_cards.pop_back();
+	std::vector<Karta> hole_cards = desk_cards;//karty na stole
+	while (hole_cards.size() < 5) { hole_cards.push_back(all_cards.back()); all_cards.pop_back(); }//dodaj losowe karty jako te nieodkryte
 	for (int i = 0; i < 2; i++)  players[0].reka.push_back(all_cards.back()); all_cards.pop_back(); //karty gracza
 	players[1].reka = hand_cards;//karty bota
 	

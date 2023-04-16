@@ -375,7 +375,26 @@ inline void play_handler() {
                 }
                 if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
                 else {
-                    Point p(Gracz::graczList[1].reka, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
+                    std::vector<Karta> revealed_cards;
+                    switch (Game::checked_cards)
+                    {
+                    case 0:
+                        break;
+                    case 1:
+                        for (int i = 0; i < 3; i++) {
+                            revealed_cards.push_back(Game::stol[i]);
+                        }
+                        break;
+                    case 2:
+                        for (int i = 0; i < 4; i++) {
+                            revealed_cards.push_back(Game::stol[i]);
+                        }
+                        break;
+                    case 3:
+                        revealed_cards = Game::stol;
+                        break;
+                    }
+                    Point p(Gracz::graczList[1].reka,revealed_cards, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
                     Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
                     Game::enemy_turn = false;
                     waited = false;

@@ -25,6 +25,7 @@ class Point {
 	int wins;
 
 	static std::vector<Karta> hand_cards;
+	static std::vector<Karta> desk_cards;
 	SimData sd;
 	//MCTS core functions
 	Point* selection(void);//wybiera node ktory bedziemy sprawdzac "co dalej?" - wybieramy najbardziej obiecujacy
@@ -37,7 +38,7 @@ class Point {
 public:
 	int get_next_move(void);
 	int get_raise_by(void);
-	Point(const std::vector<Karta>& _hand_cards, bool _isDealer, int _bot_credits, int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks, int _pool, int _checked_cards);
+	Point(const std::vector<Karta>& _hand_cards, const std::vector<Karta>& _desk_cards, bool _isDealer, int _bot_credits, int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks, int _pool, int _checked_cards);
 	~Point();
 };
 
