@@ -194,7 +194,6 @@ int main()
 
 int mouse_state = 0, mouse_old_state = 0;
 bool waiting = false; bool waited = false;
-bool match_point = false, match_point_click_check = false;
 int fin_min_raise = 0;
 time_t start, now;
 inline bool mouse_click() {
@@ -358,92 +357,96 @@ inline void play_handler() {
         }
     }
     else { //GRA
-        if (match_point_click_check) {
-            if (mouse_click()) { 
-                match_point_click_check = !match_point_click_check;       
-                play_init();
-                return;
+        if (Game::enemy_turn) {//RUCH KOMPUTERA
+            if (waiting) {
+                time(&now);
+                //std::cout << difftime(now, start) << std::endl;
+                if (difftime(now, start) >= WAIT_TIME) { waited = true; waiting = false; }
+                else { return; }
             }
-        }
-        else {
-            if (Game::enemy_turn) {//RUCH KOMPUTERA
-                if (waiting) {
-                    time(&now);
-                    //std::cout << difftime(now, start) << std::endl;
-                    if (difftime(now, start) >= WAIT_TIME) { waited = true; waiting = false; }
-                    else { return; }
-                }
-                if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
-                else {
-                    std::vector<Karta> revealed_cards;
-                    switch (Game::checked_cards)
-                    {
-                    case 0:
-                        break;
-                    case 1:
-                        for (int i = 0; i < 3; i++) {
-                            revealed_cards.push_back(Game::stol[i]);
-                        }
-                        break;
-                    case 2:
-                        for (int i = 0; i < 4; i++) {
-                            revealed_cards.push_back(Game::stol[i]);
-                        }
-                        break;
-                    case 3:
-                        revealed_cards = Game::stol;
-                        break;
+            if (!waited) { time(&start); waiting = true; Game::enemy_desc = "Enemy thinks."; play_init(); return; }
+            else {
+                std::vector<Karta> revealed_cards;
+                switch (Game::checked_cards)
+                {
+                case 0:
+                    break;
+                case 1:
+                    for (int i = 0; i < 3; i++) {
+                        revealed_cards.push_back(Game::stol[i]);
                     }
+                    break;
+                case 2:
+                    for (int i = 0; i < 4; i++) {
+                        revealed_cards.push_back(Game::stol[i]);
+                    }
+                    break;
+                case 3:
+                    revealed_cards = Game::stol;
+                    break;
+                }
+           
+               //DO TESTOW
+    /*            if (0) {
+                    Gracz::graczList[1].bot_action(0, Gracz::graczList[1].get_credits());
+                    Game::enemy_turn = false;
+                }
+                else {
                     Point p(Gracz::graczList[1].reka,revealed_cards, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
                     Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
                     Game::enemy_turn = false;
-                    waited = false;
+                }*/
+                Point p(Gracz::graczList[1].reka,revealed_cards, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
+                Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
+                Game::enemy_turn = false;
+                if (Game::last_move) { Game::last_move = false; Game::checked_cards = 4; }
+                waited = false;
+                play_init(); return;
+            }
+        }
+        else {//RUCHA GRACZA
+            if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
+                if (mouse_click()) { //raise confirm
+                    Gracz::graczList[0].raise(Game::raise);
+                    Game::enemy_turn = true;
+                    if (Game::last_move) { Game::last_move = false; Game::checked_cards = 4; }
+                    play_init();
+                    return;
+                }
+            }
+            if (StaticObject::collisionList.at(1).pointed_by_mouse()) {
+                if (mouse_click()) { //bigger raise 
+                    Game::raise += 100;
+                    if (Game::raise > Gracz::graczList[0].get_credits()) {
+                        Game::raise = fin_min_raise; 
+                    }
                     play_init(); return;
                 }
             }
-            else {//RUCHA GRACZA
-                if (StaticObject::collisionList.at(0).pointed_by_mouse()) {
-                    if (mouse_click()) { //raise confirm
-                        Gracz::graczList[0].raise(Game::raise);
-                        Game::enemy_turn = true;
-                        play_init();
-                        return;
+            if (StaticObject::collisionList.at(2).pointed_by_mouse()) {
+                if (mouse_click()) {//smaller raise
+                    Game::raise -= 100;
+                    if (Game::raise < fin_min_raise) {
+                        Game::raise = Gracz::graczList[0].get_credits(); 
                     }
+                    play_init(); return;
                 }
-                if (StaticObject::collisionList.at(1).pointed_by_mouse()) {
-                    if (mouse_click()) { //bigger raise 
-                        Game::raise += 100;
-                        if (Game::raise > Gracz::graczList[0].get_credits()) {
-                            Game::raise = fin_min_raise;
-                        }
-                        play_init(); return;
-                    }
+            }
+            if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
+                if (mouse_click()) { //call 
+                    Gracz::graczList[0].call(0);
+                    Game::enemy_turn = true;
+                    if (Game::last_move) { Game::last_move = false; Game::checked_cards = 4; }
+                    play_init(); return;
                 }
-                if (StaticObject::collisionList.at(2).pointed_by_mouse()) {
-                    if (mouse_click()) {//smaller raise
-                        Game::raise -= 100;
-                        if (Game::raise < fin_min_raise) {
-                            Game::raise = Gracz::graczList[0].get_credits();
-                        }
-                        play_init(); return;
-                    }
-                }
-                if (StaticObject::collisionList.at(3).pointed_by_mouse()) {
-                    if (mouse_click()) { //call 
-                        Gracz::graczList[0].call(0);
-                        Game::enemy_turn = true;
-                        play_init(); return;
-                    }
-                }
-                if (StaticObject::collisionList.at(4).pointed_by_mouse()) {
-                    if (mouse_click()) {//fold    
-                        Gracz::graczList[0].fold(0);
-                        play_init(); return;
-                    }
+            }
+            if (StaticObject::collisionList.at(4).pointed_by_mouse()) {
+                if (mouse_click()) {//fold    
+                    Gracz::graczList[0].fold(0);
+                    play_init(); return;
                 }
             }
         }
-       
     }
 }
 inline void play_init() {
@@ -462,8 +465,9 @@ inline void play_init() {
         else{
             Game::enemy_turn = Game::whos_dealer = 1 - Game::whos_dealer;
         }
-        Gracz::graczList[0].checks = false;
-        Gracz::graczList[1].checks = false;
+        Game::enemy_desc = "New cards dealt.";
+        Gracz::graczList[0].checks = false;  Gracz::graczList[0].allin = false;
+        Gracz::graczList[1].checks = false;  Gracz::graczList[1].allin = false;
         Game::stworz_talie(Game::talia);
         Gracz::graczList[0].wez_karty_z_talii(); 
         Gracz::graczList[1].wez_karty_z_talii(); 
@@ -471,6 +475,7 @@ inline void play_init() {
         Game::missing_blind = false;
         Game::blinds(Game::whos_dealer);
         Game::raise = Game::minimal_raise;
+        Game::last_move = false;
         Game::checked_cards = 0;
         Game::game_started = true;
     }
@@ -485,7 +490,7 @@ inline void play_init() {
         fin_min_raise += Game::minimal_raise;
 
         if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
-        if (Game::raise > Gracz::graczList[0].get_credits()) { Gracz::graczList[0].allin = true; Game::raise = Gracz::graczList[0].get_credits(); }
+        if (Game::raise > Gracz::graczList[0].get_credits()) { Game::raise = Gracz::graczList[0].get_credits(); }
     }
     else {//enemy raises
         fin_min_raise = Gracz::graczList[0].gave_to_pool - Gracz::graczList[1].gave_to_pool;
@@ -493,11 +498,11 @@ inline void play_init() {
         fin_min_raise += Game::minimal_raise;
 
         if (Game::raise < fin_min_raise) { Game::raise = fin_min_raise; }
-        if (Game::raise > Gracz::graczList[1].get_credits()) { Gracz::graczList[1].allin = true; Game::raise = Gracz::graczList[1].get_credits(); }
+        if (Game::raise > Gracz::graczList[1].get_credits()) {  Game::raise = Gracz::graczList[1].get_credits(); }
     }
 
-    if (match_point && match_point_click_check == false) {//sprawdz czy kliknieto na potwierdzenie
-        Game::checked_cards = 4;
+    if (Gracz::graczList[0].allin || Gracz::graczList[1].allin) {//sprawdz czy ktos dal allin - jesli tak pozwol mu zdecydowac czy chce grac czy nie(call/fold)
+        Game::last_move = true;
     }
 
     if (Game::missing_blind) {//czy kazdy mial wystarczajaco pieniedzy na blind? - jesli tak przerwij i zakoncz gre
@@ -511,13 +516,11 @@ inline void play_init() {
         else {
             //NO CREDITS CONDITION
 
-            if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-                match_point = true; match_point_click_check = true;//te dwie flagi sa gaszone gdy po kliknieciu sterowanie dojdzie do wyboru wygrywajacego
-                // std::cout << "Match point!" << std::endl;
-                Gracz::graczList[0].checks = false;
-                Gracz::graczList[1].checks = false;
-            }
-            else if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
+            //if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
+            //   // std::cout << "Match point! - Someone has no credits!" << std::endl;     
+            //}
+            //else if(...)//CHECK CONDITION
+            if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
                 Game::checked_cards++;
                 Gracz::graczList[0].checks = false;
                 Gracz::graczList[1].checks = false;
@@ -539,11 +542,12 @@ inline void play_init() {
                 else {//remis
                     Game::end_round(2);
                 }
-                match_point = false; match_point_click_check = false;
             }
         }
     }
-   
+    //TEST
+    //Text::AddRaw(std::to_string(Gracz::graczList[0].allin), 0.9f, 0.9f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+    //Text::AddRaw(std::to_string(Gracz::graczList[1].allin), 0.95f, 0.9f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
     else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -588,10 +592,6 @@ inline void play_init() {
     case 2:
         Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
         Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
-        if (match_point) {
-            Text::AddRaw("Forced check", 0.775f, -0.15f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.647f, 0.0f));
-            Text::AddRaw("(Click to reveal cards)", 0.775f, -0.25f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
-        }
         break;
     case 3:
         Text::AddRaw("Draw!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.8f, 0.8f, 0.8f));

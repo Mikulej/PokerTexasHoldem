@@ -72,6 +72,7 @@ public:
 	static int whowins; //0=player 1=enemy 2=none
 	static int won_prize; //wartosc pool na koncu poprzedniej rundy
 	static bool missing_blind;//sprawdza czy wszystkie blindy zostala poprawnie przydzielone
+	static int last_move; //flaga do rozstrzygania sytuacji All In
 	static std::string enemy_desc;
 	static void clear_pool(void);
 	static int get_pool(void);

@@ -82,6 +82,7 @@ void Gracz::wez_karty_z_talii() {
 	reka.push_back(Game::talia.back()); Game::talia.pop_back();
 }
 void Gracz::raise(int _v) {
+	if (credits == _v) { allin = true; }
 	give_to_pool(_v);
 	for (auto g : graczList) g.checks = false;	
 }
@@ -95,6 +96,7 @@ void Gracz::call(int _caller) {
 		}
 		else {//nie ma
 			give_to_pool(Gracz::graczList[_caller].credits);
+			allin = true;
 		}
 		if(_caller){ Game::enemy_desc = "Enemy calls."; }
 	}
@@ -361,6 +363,7 @@ int Game::checked_cards = 0;
 int Game::whowins = 2; //0=player 1=enemy 2=none 3=draw
 int Game::won_prize = 0;
 bool Game::missing_blind = false;
+int Game::last_move = false;
 std::string Game::enemy_desc = "New cards dealt.";
 std::vector<Karta> Game::talia;
 std::vector<Karta> Game::stol;
@@ -397,6 +400,8 @@ void Game::blinds(int _d) {//przydziel stawki startowe
 		if (Gracz::graczList[1].get_credits() >= 200) { Gracz::graczList[1].give_to_pool(200); }
 		else { missing_blind = true; }
 	}
+	if (Gracz::graczList[0].get_credits() == 0) { Gracz::graczList[0].allin = true; }
+	if (Gracz::graczList[1].get_credits() == 0) { Gracz::graczList[1].allin = true; }
 }
 void Game::end_round(int _winner) {
 	if(_winner == 2){
