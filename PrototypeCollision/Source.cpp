@@ -228,41 +228,36 @@ inline void main_menu_handler() {
 }
 inline void main_menu_init() {
     StaticObject::DelAll(); Text::DelAll();
-    StaticObject::AddItem(0, 0, -0.1f);  Text::Add("Start", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
-    StaticObject::AddItem(0, 0, -0.4f);  Text::Add("Options", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
-    StaticObject::AddItem(0, 0, -0.7f);  Text::Add("Exit", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
+    StaticObject::AddItem(0, 0, -0.1f);  Text::Add("Play", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
+    StaticObject::AddItem(0, 0, -0.4f);  Text::Add("Options", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
+    StaticObject::AddItem(0, 0, -0.7f);  Text::Add("Exit", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
 
     game_state = main_menu;
 }
 inline void options_init() {
     StaticObject::DelAll(); Text::DelAll();
-    StaticObject::AddItem(0, 0, -0.85f);  Text::Add("Back", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
+    StaticObject::AddItem(0, 0, -0.85f);  Text::Add("Back", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
     //SELECT CARD REVERSE
-    StaticObject::AddItem(10, 0.3f, 0.7f); Text::AddRaw("Card Reverse", -0.3f, 0.7f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    StaticObject::AddItem(1, 0.5f, 0.7f); Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
-    StaticObject::AddItem(1, 0.1f, 0.7f); Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true);
+    StaticObject::AddItem(10, 0.3f, 0.7f); Text::AddRaw("Card Reverse", -0.2f, 0.7f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    StaticObject::AddItem(1, 0.5f, 0.7f); Text::Add(">", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
+    StaticObject::AddItem(1, 0.1f, 0.7f); Text::Add("<", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true);
     //SELECT STARTING CREDITS
-    Text::AddRaw("Starting credits", -0.3f, 0.3f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    StaticObject::AddItem(1, 0.5f, 0.3f); Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
-    StaticObject::AddItem(1, 0.1f, 0.3f); Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 5, true);
-    Text::AddRaw(std::to_string(Game::starting_credits), 0.15f, 0.27f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw("Starting credits", -0.2f, 0.3f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    StaticObject::AddItem(1, 0.5f, 0.3f); Text::Add(">", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
+    StaticObject::AddItem(1, 0.1f, 0.3f); Text::Add("<", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 5, true);
+    Text::AddRaw(std::to_string(Game::starting_credits), 0.2f, 0.27f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     //SELECT MIN RAISE
-    Text::AddRaw("Minimal raise", -0.3f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    StaticObject::AddItem(1, 0.5f, 0.0f); Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 6, true);
-    StaticObject::AddItem(1, 0.1f, 0.0f); Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 7, true);
-    Text::AddRaw(std::to_string(Game::minimal_raise), 0.15f, -0.03f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw("Minimal raise", -0.2f, 0.0f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    StaticObject::AddItem(1, 0.5f, 0.0f); Text::Add(">", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 6, true);
+    StaticObject::AddItem(1, 0.1f, 0.0f); Text::Add("<", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 7, true);
+    Text::AddRaw(std::to_string(Game::minimal_raise), 0.2f, -0.03f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
     //SELECT STARTING DEALER
-    Text::AddRaw("Starting dealer", -0.3f, -0.3f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    StaticObject::AddItem(1, 0.5f, -0.3f); Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 8, true);
-    StaticObject::AddItem(1, 0.1f, -0.3f); Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 9, true);
-    if (Game::dealer_option == 0) Text::AddRaw("Player", 0.3f, -0.3f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    else if (Game::dealer_option == 1) Text::AddRaw("Enemy", 0.3f, -0.3f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    else if (Game::dealer_option == 2) Text::AddRaw("Random", 0.3f, -0.3f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    //SELECT STARTING CREDITS
-    Text::AddRaw("Starting credits", -0.3f, -0.6f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    StaticObject::AddItem(1, 0.5f, -0.6f); Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 10, true);
-    StaticObject::AddItem(1, 0.1f, -0.6f); Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 11, true);
-    Text::AddRaw(std::to_string(Game::starting_credits), 0.15f, -0.635f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw("Starting dealer", -0.2f, -0.3f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    StaticObject::AddItem(1, 0.5f, -0.3f); Text::Add(">", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 8, true);
+    StaticObject::AddItem(1, 0.1f, -0.3f); Text::Add("<", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 9, true);
+    if (Game::dealer_option == 0) Text::AddRaw("Player", 0.3f, -0.3f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    else if (Game::dealer_option == 1) Text::AddRaw("Enemy", 0.3f, -0.3f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
+    else if (Game::dealer_option == 2) Text::AddRaw("Random", 0.3f, -0.3f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
     game_state = options;
 }
 inline void options_handler() {
@@ -330,19 +325,8 @@ inline void options_handler() {
             options_init(); return;
         }
     }
-    //SELECT SMALL BIND?
-    if (StaticObject::collisionList.at(10).pointed_by_mouse()) {
-        if (mouse_click()) { //options_init() placeholder
-
-        }
-    }
-    if (StaticObject::collisionList.at(11).pointed_by_mouse()) {
-        if (mouse_click()) { //options_init() placeholder
-
-        }
-    }
 }
-#define WAIT_TIME 1 //czas myslenia przeciwnika 3
+#define WAIT_TIME 0 //czas myslenia przeciwnika 1
 inline void play_handler() {
     if (Game::whowins != 2) {//KONIEC RUNDY
         if (mouse_click()) {            
@@ -384,18 +368,7 @@ inline void play_handler() {
                 case 3:
                     revealed_cards = Game::stol;
                     break;
-                }
-           
-               //DO TESTOW
-    /*            if (0) {
-                    Gracz::graczList[1].bot_action(0, Gracz::graczList[1].get_credits());
-                    Game::enemy_turn = false;
-                }
-                else {
-                    Point p(Gracz::graczList[1].reka,revealed_cards, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
-                    Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
-                    Game::enemy_turn = false;
-                }*/
+                }         
                 Point p(Gracz::graczList[1].reka,revealed_cards, Game::whos_dealer, Gracz::graczList[1].get_credits(), Gracz::graczList[1].gave_to_pool, Gracz::graczList[0].get_credits(), Gracz::graczList[0].gave_to_pool, Gracz::graczList[0].checks,Game::get_pool(),Game::checked_cards);
                 Gracz::graczList[1].bot_action(p.get_next_move(), p.get_raise_by());
                 Game::enemy_turn = false;
@@ -545,9 +518,6 @@ inline void play_init() {
             }
         }
     }
-    //TEST
-    //Text::AddRaw(std::to_string(Gracz::graczList[0].allin), 0.9f, 0.9f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
-    //Text::AddRaw(std::to_string(Gracz::graczList[1].allin), 0.95f, 0.9f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
     //BUTTONS
     if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
     else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
@@ -658,11 +628,6 @@ void processInput(GLFWwindow* window)
     case play_state:
         play_handler();
         break;
-    }
-    //testy
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
-        SCR_WIDTH = 800; SCR_HEIGHT = 450;
-        glfwSetWindowSize(window, SCR_WIDTH, SCR_HEIGHT);
     }
     //OLD STATES
     mouse_old_state = mouse_state;
