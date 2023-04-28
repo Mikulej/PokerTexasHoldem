@@ -33,7 +33,7 @@ void StaticObject::AddItem(int _ID,float _x,float _y,int a,int b) {
 	case 2://small button
 		pom = Add(texture_box, _x, _y, 0);
 		(*pom).set_color(8); (*pom).original_color = 8;
-		(*pom).set_scale(5.0f, 1.0f);
+		(*pom).set_scale(4.0f, 1.0f);
 		break;
 	case 3://text box
 		pom = Add(texture_box, _x, _y, 0);

@@ -228,6 +228,7 @@ inline void main_menu_handler() {
 }
 inline void main_menu_init() {
     StaticObject::DelAll(); Text::DelAll();
+    Text::AddRaw("Poker Texas Hold'em", 0.0f, 0.5f, 0.0012f, 0.002f, glm::vec3(0.9f, 0.9f, 0.9f));
     StaticObject::AddItem(0, 0, -0.1f);  Text::Add("Play", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true);
     StaticObject::AddItem(0, 0, -0.4f);  Text::Add("Options", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
     StaticObject::AddItem(0, 0, -0.7f);  Text::Add("Exit", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
@@ -478,7 +479,7 @@ inline void play_init() {
         Game::last_move = true;
     }
 
-    if (Game::missing_blind) {//czy kazdy mial wystarczajaco pieniedzy na blind? - jesli tak przerwij i zakoncz gre
+    if (Game::missing_blind) {//czy kazdy mial wystarczajaco pieniedzy na blind? - jesli nie przerwij i zakoncz gre
         if (Gracz::graczList[0].get_credits() < Gracz::graczList[1].get_credits()) { Game::end_round(1); }
         else { Game::end_round(0); }
     }
@@ -487,12 +488,6 @@ inline void play_init() {
         if (Gracz::graczList[0].folds) { Game::end_round(1); Gracz::graczList[0].folds = false; }
         else if (Gracz::graczList[1].folds) { Game::end_round(0); Gracz::graczList[1].folds = false; }
         else {
-            //NO CREDITS CONDITION
-
-            //if (Gracz::graczList[0].get_credits() == 0 || Gracz::graczList[1].get_credits() == 0) {
-            //   // std::cout << "Match point! - Someone has no credits!" << std::endl;     
-            //}
-            //else if(...)//CHECK CONDITION
             if (Gracz::graczList[0].checks && Gracz::graczList[1].checks) {//CHECK CONDITION
                 Game::checked_cards++;
                 Gracz::graczList[0].checks = false;
@@ -519,13 +514,13 @@ inline void play_init() {
         }
     }
     //BUTTONS
-    if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
-    else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
-    StaticObject::AddItem(1, 0.2f, -0.9f);  Text::Add(">", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
-    StaticObject::AddItem(1, -0.2f, -0.9f);  Text::Add("<", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
-    if (Gracz::graczList[0].gave_to_pool >= Gracz::graczList[1].gave_to_pool) { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Check", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
-    else { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Call", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
-    StaticObject::AddItem(2, 0.8f, -0.7f);  Text::Add("Fold", 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
+    if(Game::raise == Gracz::graczList[0].get_credits()){ StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("All in", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
+    else { StaticObject::AddItem(2, 0.0f, -0.7f);  Text::Add("Raise", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 0, true); }
+    StaticObject::AddItem(1, 0.15f, -0.9f);  Text::Add(">", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 1, true);
+    StaticObject::AddItem(1, -0.15f, -0.9f);  Text::Add("<", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 2, true);
+    if (Gracz::graczList[0].gave_to_pool >= Gracz::graczList[1].gave_to_pool) { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Check", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
+    else { StaticObject::AddItem(2, 0.4f, -0.7f);  Text::Add("Call", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 3, true); }
+    StaticObject::AddItem(2, 0.8f, -0.7f);  Text::Add("Fold", 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), 4, true);
     //PLAYERS HAND
     if (ending_game != 2) {//zaslon karty jesli jest koniec gry
         StaticObject::AddItem(10, -0.5f, -0.7f);
@@ -539,45 +534,42 @@ inline void play_init() {
     switch (Game::whowins) {
     case 0:
         if (ending_game == 0) {
-            Text::AddRaw("Victory", 0.75f, 0.1f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f));
-            Text::AddRaw("(Click to return to menu)", 0.775f, 0.0f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+            Text::AddRaw("Victory", 0.75f, 0.1f, 0.0012f, 0.002f, glm::vec3(0.56f, 0.93f, 0.56f));
+            Text::AddRaw("(Click to return to menu)", 0.775f, -0.05f, 0.000405f, 0.000675f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
         else if (ending_game == 2) {
-            Text::AddRaw("You Win!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.56f, 0.93f, 0.56f));
-            Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f), true);
-            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+            Text::AddRaw("You Win!", 0.75f, 0.2f, 0.000675f, 0.001125f, glm::vec3(0.56f, 0.93f, 0.56f));
+            Text::AddRaw(std::to_string(Game::won_prize), 0.675f, 0.0f, 0.0006f, 0.001f, glm::vec3(0.56f, 0.93f, 0.56f), true);
+            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.000375f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
         break;
     case 1:      
         if (ending_game == 1) {
-            Text::AddRaw("Defeat", 0.75f, 0.1f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f));
-            Text::AddRaw("(Click to return to menu)", 0.775f , 0.0f, 0.00045f, 0.00045f, glm::vec3(0.8f, 0.8f, 0.8f));
+            Text::AddRaw("Defeat", 0.75f, 0.1f, 0.0012f, 0.002f, glm::vec3(1.0f, 0.447f, 0.463f));
+            Text::AddRaw("(Click to return to menu)", 0.775f, -0.05f, 0.000405f, 0.000675f, glm::vec3(0.8f, 0.8f, 0.8f));
         }
         else if (ending_game == 2) {
-            Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(1.0f, 0.447f, 0.463f));
-            Text::AddRaw(std::to_string(Game::won_prize), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f), true);
-            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+            Text::AddRaw("Enemy Wins!", 0.75f, 0.2f, 0.000675f, 0.001125f, glm::vec3(1.0f, 0.447f, 0.463f));
+            Text::AddRaw(std::to_string(Game::won_prize), 0.675f, 0.0f, 0.0006f, 0.001f, glm::vec3(1.0f, 0.447f, 0.463f), true);
+            Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.000375f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         }     
         break;
     case 2:
-        Text::AddRaw("Pool:", 0.75f, 0.2f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-        Text::AddRaw(std::to_string(Game::get_pool()), 0.6f, 0.0f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+        Text::AddRaw("Pool:", 0.75f, 0.2f, 0.000675f, 0.001125f, glm::vec3(0.8f, 0.8f, 0.8f));
+        Text::AddRaw(std::to_string(Game::get_pool()), 0.675f, 0.0f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
         break;
     case 3:
-        Text::AddRaw("Draw!", 0.75f, 0.2f, 0.00075f, 0.00075f, glm::vec3(0.8f, 0.8f, 0.8f));
-        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.0005f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
+        Text::AddRaw("Draw!", 0.75f, 0.2f, 0.000675f, 0.001125f, glm::vec3(0.8f, 0.8f, 0.8f));
+        Text::AddRaw("(Click to continue)", 0.75f, -0.1f, 0.000375f, 0.0005f, glm::vec3(0.8f, 0.8f, 0.8f));
         break;
     }
    
-    Text::AddRaw("Your credits:", 0.2f, -0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    Text::AddRaw(std::to_string(Gracz::graczList[0].get_credits()) + "(" + std::to_string(Gracz::graczList[0].gave_to_pool) + ")", 0.5f, -0.53f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
-    Text::AddRaw("Enemy credits:", 0.2f, 0.5f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f));
-    Text::AddRaw(std::to_string(Gracz::graczList[1].get_credits())+ "(" + std::to_string(Gracz::graczList[1].gave_to_pool) + ")", 0.5f, 0.47f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
-    Text::AddRaw(Game::enemy_desc, -0.3f, 0.8f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true); 
-    Text::AddRaw(std::to_string(Game::raise), -0.15f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true); 
-    Text::AddRaw("Dealer:", 0.5f, -0.9f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f)); 
-    if (Game::whos_dealer == 0) Text::AddRaw("You", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
-    else if (Game::whos_dealer == 1)  Text::AddRaw("Enemy", 0.65f, -0.93f, 0.001f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw("Your credits: " + std::to_string(Gracz::graczList[0].get_credits()) + "(" + std::to_string(Gracz::graczList[0].gave_to_pool) + ")", 0.25f, -0.5f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw("Enemy credits: " + std::to_string(Gracz::graczList[1].get_credits())+ "(" + std::to_string(Gracz::graczList[1].gave_to_pool) + ")", 0.25f, 0.47f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    Text::AddRaw(Game::enemy_desc, -0.3f, 0.8f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true); 
+    Text::AddRaw(std::to_string(Game::raise), -0.0875f, -0.93f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true); 
+    if (Game::whos_dealer == 0) Text::AddRaw("Dealer: You", 0.5f, -0.93f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
+    else if (Game::whos_dealer == 1)  Text::AddRaw("Dealer: Enemy", 0.5f, -0.93f, 0.0006f, 0.001f, glm::vec3(0.8f, 0.8f, 0.8f), true);
 
     //KARTA NR1
     if (Game::checked_cards == 0) { StaticObject::AddItem(10, -0.8f, 0.0f); }
