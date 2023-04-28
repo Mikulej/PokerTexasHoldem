@@ -1,7 +1,7 @@
 #include "BotAI.h"
 std::vector<Karta> Point::hand_cards;
 std::vector<Karta> Point::desk_cards;
-#define SIM_NUM 500
+#define SIM_NUM 5000
 Point::Point(const std::vector<Karta>& _hand_cards, const std::vector<Karta>& _desk_cards, bool _isDealer, int _bot_credits,int _bot_gave, int _enemy_credits, int _enemy_gave, bool _enemy_checks,  int _pool,int _checked_cards) {//head constructor
 	hand_cards = _hand_cards;
 	desk_cards = _desk_cards;
@@ -27,6 +27,10 @@ Point::Point(const std::vector<Karta>& _hand_cards, const std::vector<Karta>& _d
 		won_sim = node_current->node_fold->simulation();
 		node_current->node_fold->update(won_sim);
 		node_current = selection();//wybierz nowe rozgalezienie do obslugi
+		if (node_current->sd.bot_credits == Game::starting_credits * 2 || node_current->sd.enemy_credits == Game::starting_credits * 2) {//jesli zdecyduje sie rozwinac lisc ktory obejmuje stna po koncu gry, przerwij wykonywanie symulacji
+			//std::cout << "Expanding end game state! sim_num:" << simulations << std::endl;
+			break;
+		}
 		
 	}
 	std::cout << "Simulations done:" << simulations << std::endl;
