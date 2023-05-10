@@ -15,7 +15,7 @@ extern int SCR_WIDTH = 800;//1280
 extern int SCR_HEIGHT = 450;//720
 enum { main_menu, options, exit_program, play_state } game_state;
 
-int main()
+int WinMain()
 {
 
     glfwSetErrorCallback(error_callback);
