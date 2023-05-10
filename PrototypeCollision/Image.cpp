@@ -3,8 +3,7 @@ std::vector<Image> Image::renderList;
 extern int SCR_WIDTH, SCR_HEIGHT;
 Image::Image(unsigned int _texture,float _x,float _y,unsigned int _layer) : texture(_texture),layer(_layer){
     Pos = glm::vec4(_x,_y,0, 0);
-    Scale = glm::vec4(1,1,1,1); //Scale = glm::vec4(0,0,0,0);
-    //Color = glm::vec4(0, 0, 0, 0);
+    Scale = glm::vec4(1,1,1,1); 
     Offset = glm::vec2(0, 0);
     Zoom = glm::vec2(1, 1);
     angle = 0;
@@ -90,8 +89,7 @@ void Image::RenderAll(unsigned int _VAO, Shader& ourShader) { //wywoluje dla kaz
     unsigned int texZoomLoc = glGetUniformLocation(ourShader.ID, "texZoom");
     unsigned int texOffsetLoc = glGetUniformLocation(ourShader.ID, "texOffset");
     
-    //testMat[row][col] = blabla; TAK NIE JEST!
-    //testMat[col][row] = blabla; TAK CHYBA JEST
+    //testMat[col][row] = blabla; 
     for (auto img : renderList) {
         glm::mat4 trans = glm::mat4(1.0f);
         glm::mat4 temp = glm::mat4(1.0f);
@@ -110,8 +108,8 @@ void Image::RenderAll(unsigned int _VAO, Shader& ourShader) { //wywoluje dla kaz
         trans = trans * temp;
         //Skaluj
         temp = glm::mat4(1.0f);
-        temp[0][0] = img.Scale.x;// / (double)SCR_WIDTH;
-        temp[1][1] = img.Scale.y;// / (double)SCR_HEIGHT;
+        temp[0][0] = img.Scale.x;
+        temp[1][1] = img.Scale.y;
         trans = trans * temp;
         //Zbinduj teksture
         glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture

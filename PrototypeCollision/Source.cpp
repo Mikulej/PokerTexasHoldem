@@ -327,7 +327,7 @@ inline void options_handler() {
         }
     }
 }
-#define WAIT_TIME 0 //czas myslenia przeciwnika 1
+#define WAIT_TIME 0 //czas myslenia przeciwnika 0
 inline void play_handler() {
     if (Game::whowins != 2) {//KONIEC RUNDY
         if (mouse_click()) {            
@@ -345,7 +345,6 @@ inline void play_handler() {
         if (Game::enemy_turn) {//RUCH KOMPUTERA
             if (waiting) {
                 time(&now);
-                //std::cout << difftime(now, start) << std::endl;
                 if (difftime(now, start) >= WAIT_TIME) { waited = true; waiting = false; }
                 else { return; }
             }
@@ -426,7 +425,6 @@ inline void play_handler() {
 inline void play_init() {
     StaticObject::DelAll(); Text::DelAll();
     game_state = play_state;
-    //Game::Initialize()?
     if (!Game::game_started) {
         Gracz::graczList[0].reka.clear(); Gracz::graczList[1].reka.clear(); Game::talia.clear(); Game::stol.clear();
         if (Game::first_round) {

@@ -28,12 +28,11 @@ Point::Point(const std::vector<Karta>& _hand_cards, const std::vector<Karta>& _d
 		node_current->node_fold->update(won_sim);
 		node_current = selection();//wybierz nowe rozgalezienie do obslugi
 		if (node_current->sd.bot_credits == Game::starting_credits * 2 || node_current->sd.enemy_credits == Game::starting_credits * 2) {//jesli zdecyduje sie rozwinac lisc ktory obejmuje stna po koncu gry, przerwij wykonywanie symulacji
-			//std::cout << "Expanding end game state! sim_num:" << simulations << std::endl;
 			break;
 		}
 		
 	}
-	std::cout << "Simulations done:" << simulations << std::endl;
+	//std::cout << "Simulations done:" << simulations << std::endl;
 	//wybierz najlepszy ruch (ten z najwieksza iloscia symulacji)
 	//zaktualizuj SimData dla korzenia bedzie to ruch ktory jako nastepny wykona bot
 	int max_sim = node_raise->simulations; sd = node_raise->sd;
@@ -282,7 +281,7 @@ void Point::expansion(void) {
 	h = h_max - h_min;
 	if (h <= 0) { nsd.raise_by = h_max; }
 	else {nsd.raise_by= (rand() % h / 100) * 100 + h_min;}
-	//ta czesc mozna zoptymalizowac bardziej ^
+
 	nsd.next_move = 0; node_raise = new Point(this, nsd); 
 	nsd.raise_by = 0;
 	nsd.next_move = 1; node_call = new Point(this,nsd);

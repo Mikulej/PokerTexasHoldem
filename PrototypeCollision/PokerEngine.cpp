@@ -340,9 +340,6 @@ void Gracz::calculate_power() {//oblicz najlepsza kombinacje kart
 }
 int Gracz::get_power(void) {return power;}
 int Gracz::get_sub_power(void) { return sub_power; }
-void Gracz::random_action(void) {
-	
-}
 void Gracz::sim_give_to_pool(int _v,int &_pool) {
 	_pool += _v;
 	gave_to_pool += _v;

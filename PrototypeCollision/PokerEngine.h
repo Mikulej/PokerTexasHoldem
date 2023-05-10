@@ -5,7 +5,6 @@
 #include <algorithm>
 //KARTA
 class Karta {
-	friend class Gracz;//tylko do testow przy tworzeniu sztucznej talii kart! get_power()
 	static std::vector<Karta> komplet;
 	
 	static int rewers;//{icefire = 1,science=2,fish=4,nuts=5,rose=10 }
@@ -53,10 +52,8 @@ public:
 	int get_power(void);
 	int get_sub_power(void);
 	//do symulacji
-	void random_action(void);
 	void sim_give_to_pool(int _val,int &_pool);
 };
-//GAME czy ta klasa wgl jest potrzebna?
 class Game {
 public:
 	static int pool;

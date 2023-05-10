@@ -16,10 +16,10 @@
 #include "glm-master/glm/glm.hpp"
 #include "glm-master/glm/gtc/matrix_transform.hpp"
 #include "glm-master/glm/gtc/type_ptr.hpp"
-#include <GLFW/glfw3.h>//tylko do testow
+#include <GLFW/glfw3.h>
 #define PI 3.14159265358979323846 
 class Image {
-	static std::vector<Image> renderList; //czy renderList powinien pozostac w Image?
+	static std::vector<Image> renderList;
 public:
 	glm::vec4 Pos;
 	glm::vec4 Scale;

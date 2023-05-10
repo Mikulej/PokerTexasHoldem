@@ -106,7 +106,7 @@ void StaticObject::set_texture(unsigned int _texture) {
 bool StaticObject::pointed_by_mouse() {
 	float width = 0.5f * (float)Image::renderList[img_id].Scale.x;
 	float hight = 0.5f* (float)Image::renderList[img_id].Scale.y;
-	if (mx > x - width && mx < x + width && my < y + hight && my > y - hight) { //pamietaj o uwzglednieniu rozciagajacego sie okna!
+	if (mx > x - width && mx < x + width && my < y + hight && my > y - hight) { 
 		set_color(original_color,true);
 		return true;
 	}
