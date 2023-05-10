@@ -385,7 +385,7 @@ int Game::get_pool() {
 	return pool;
 }
 void Game::blinds(int _d) {//przydziel stawki startowe
-	if (_d == 0) {//dealer to gracz otrzymuje small blind		
+	if (_d == 0) {//dealer to gracz - musi zaplacic big blind		
 		if(Gracz::graczList[1].get_credits() >= 100){ Gracz::graczList[1].give_to_pool(100); }
 		else { missing_blind = true; }
 		if (Gracz::graczList[0].get_credits() >= 200) { Gracz::graczList[0].give_to_pool(200); }
