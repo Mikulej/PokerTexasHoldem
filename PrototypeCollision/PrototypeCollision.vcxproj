@@ -85,6 +85,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>C:\Users\mikul\source\repos\PrototypeCollision\PrototypeCollision\Linking\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\mikul\source\repos\PrototypeCollision\PrototypeCollision\Linking\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -142,6 +144,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>C:\Users\mikul\source\repos\PrototypeCollision\PrototypeCollision\Linking\lib\freetype\freetype.lib;C:\Users\mikul\source\repos\PrototypeCollision\PrototypeCollision\Linking\lib\glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
